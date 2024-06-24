@@ -32,7 +32,7 @@ jobs:
         run: npm install -g aws-cdk
 
       - name: Deploy backend
-        working-directory: iac
+        working-directory: backend/iac
         run: |
           npm ci
           cdk deploy --require-approval never
