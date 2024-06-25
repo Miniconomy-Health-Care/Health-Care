@@ -1,0 +1,80 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "health-care-api",
+    "version" : "1"
+  },
+  "servers" : [ {
+    "url" : "https://iz5h4rni56.execute-api.eu-west-1.amazonaws.com/{basePath}",
+    "variables" : {
+      "basePath" : {
+        "default" : "prod"
+      }
+    }
+  } ],
+  "paths" : {
+    "/api/patient" : {
+      "post" : {
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreatePatientModel"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "description" : "400 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "Empty" : {
+        "title" : "Create Patient Success Schema",
+        "type" : "object"
+      },
+      "Error" : {
+        "title" : "Error Schema",
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "type" : "string"
+          }
+        }
+      },
+      "CreatePatientModel" : {
+        "required" : [ "personaId" ],
+        "type" : "object",
+        "properties" : {
+          "personaId" : {
+            "type" : "number"
+          }
+        },
+        "additionalProperties" : false
+      }
+    }
+  }
+}

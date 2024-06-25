@@ -2,10 +2,12 @@ import * as cdk from 'aws-cdk-lib';
 import {aws_ec2 as ec2, aws_iam as iam, aws_rds as rds} from 'aws-cdk-lib';
 import {Construct} from 'constructs';
 import {GitHubStackProps} from "./githubStackProps";
-import {LambdaIntegration, RestApi} from "aws-cdk-lib/aws-apigateway";
-import {Code, Function as LambdaFn, Runtime} from "aws-cdk-lib/aws-lambda";
+import {JsonSchemaType, LambdaIntegration, Model, RequestValidator, RestApi} from "aws-cdk-lib/aws-apigateway";
+import {Runtime} from "aws-cdk-lib/aws-lambda";
 import {HttpMethod} from "aws-cdk-lib/aws-apigatewayv2";
 import {Effect, PolicyDocument, PolicyStatement} from "aws-cdk-lib/aws-iam";
+import {NodejsFunction} from "aws-cdk-lib/aws-lambda-nodejs";
+import * as path from "path";
 
 export class BackendStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: GitHubStackProps) {
@@ -75,6 +77,7 @@ export class BackendStack extends cdk.Stack {
         };
 
         const elbUpdatesPolicy = iam.ManagedPolicy.fromAwsManagedPolicyName('AWSElasticBeanstalkManagedUpdatesCustomerRolePolicy')
+        const elbWebTierPolicy = iam.ManagedPolicy.fromAwsManagedPolicyName('AWSElasticBeanstalkWebTier')
 
         new iam.Role(this, `${appName}-deploy-role`, {
             assumedBy: new iam.WebIdentityPrincipal(
@@ -97,17 +100,18 @@ export class BackendStack extends cdk.Stack {
                     ],
                 }),
             },
+            managedPolicies: [elbWebTierPolicy, elbUpdatesPolicy],
             roleName: 'HealthCareDeployRole',
             description:
                 'This role is used via GitHub Actions to deploy with AWS CDK',
             maxSessionDuration: cdk.Duration.hours(1),
         });
         //Lambdas
-        const createPatientLambda = new LambdaFn(this, `create-patient-lambda`, {
+        const lambdaAppDir = path.resolve(__dirname, '../../lambda')
+        const createPatientLambda = new NodejsFunction(this, `create-patient-lambda`, {
             runtime: Runtime.NODEJS_20_X,
-            code: Code.fromAsset('../lambda'), //Folder
-            handler: 'createPatient.handler', //Filename.FunctionName
-            functionName: 'create-patient-lambda'
+            entry: path.join(lambdaAppDir, 'createPatient.ts'),
+            functionName: 'create-patient-lambda',
         });
 
         // API
@@ -118,8 +122,34 @@ export class BackendStack extends cdk.Stack {
         });
 
         const apiResource = api.root.addResource('api')
+        const createPatientRequestModel = new Model(this, 'create-patient-request-model', {
+            restApi: api,
+            schema: {
+                additionalProperties: false,
+                type: JsonSchemaType.OBJECT,
+                required: ['personaId'],
+                properties: {
+                    personaId: {type: JsonSchemaType.NUMBER}
+                }
+            }
+        });
+
+        const createPatientValidator = new RequestValidator(this, 'create-patient-validator', {
+            restApi: api,
+            validateRequestBody: true
+        })
+
 
         apiResource.addResource('patient')
-            .addMethod(HttpMethod.POST, new LambdaIntegration(createPatientLambda))
+            .addMethod(HttpMethod.POST, new LambdaIntegration(createPatientLambda), {
+                requestValidator: createPatientValidator,
+                requestModels: {'application/json': createPatientRequestModel},
+                methodResponses: [{
+                    statusCode: '200', responseModels: {'application/json': Model.EMPTY_MODEL}
+                },
+                    {statusCode: '400', responseModels: {'application/json': Model.ERROR_MODEL}},
+                ],
+            })
+
     }
 }
