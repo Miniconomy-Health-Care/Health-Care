@@ -25,10 +25,10 @@ function App() {
     alert("2");
   }
 
-  function Test(){
+  /*function Test(){
     let { code } = useParams();
     alert(code);
-  }
+  }*/
 
   return (
     <div>
@@ -45,14 +45,22 @@ function App() {
         <button onClick={logout}>Logout</button>
       </div>
 
-      <Routes>
+      {/*<Routes>
         <Route path="/Home" element={ <Home/> } />
         <Route path="/Patients" element={ isAutheticated ? <Patients/> : <Navigate to="/Home" /> } />
         <Route path="/Income" element={ isAutheticated ? <Income/> : <Navigate to="/Home" /> } />
         <Route path="/" element={ <Home/> } />
         <Route path="/:code?" element={ <Test/>} />
         <Route path="*" element={<NotFound />} />
-      </Routes>
+  </Routes>*/}
+      
+      <Routes>
+        <Route path="/Home" element={ <Home/> } />
+        <Route path="/Patients" element={ <Patients/>} />
+        <Route path="/Income" element={ <Income/>} />
+        <Route path="/" element={ <Home/> } />
+        <Route path="*" element={<NotFound />} />
+  </Routes>
       
     </div>
   );
