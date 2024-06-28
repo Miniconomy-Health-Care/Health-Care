@@ -1,5 +1,5 @@
 import * as cdk from 'aws-cdk-lib';
-import {aws_ec2 as ec2, aws_iam as iam, aws_rds as rds} from 'aws-cdk-lib';
+import {aws_ec2 as ec2, aws_iam as iam, aws_rds as rds, Duration} from 'aws-cdk-lib';
 import {Construct} from 'constructs';
 import {GitHubStackProps} from "./githubStackProps";
 import {JsonSchemaType, LambdaIntegration, Model, RequestValidator, RestApi} from "aws-cdk-lib/aws-apigateway";
@@ -8,6 +8,8 @@ import {HttpMethod} from "aws-cdk-lib/aws-apigatewayv2";
 import {Effect, PolicyDocument, PolicyStatement} from "aws-cdk-lib/aws-iam";
 import {NodejsFunction} from "aws-cdk-lib/aws-lambda-nodejs";
 import * as path from "path";
+import {Queue} from "aws-cdk-lib/aws-sqs";
+import {SqsEventSource} from "aws-cdk-lib/aws-lambda-event-sources";
 
 export class BackendStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: GitHubStackProps) {
@@ -114,6 +116,66 @@ export class BackendStack extends cdk.Stack {
             functionName: 'create-patient-lambda',
         });
 
+        const getAllPatientRecordsLambda = new NodejsFunction(this, `get-all-patient-records-lambda`, {
+            runtime: Runtime.NODEJS_20_X,
+            entry: path.join(lambdaAppDir, 'getAllPatientRecords.ts'),
+            functionName: 'get-all-patient-records-lambda',
+        });
+
+        const getPatientRecordByIdLambda = new NodejsFunction(this, `get-patient-record-lambda`, {
+            runtime: Runtime.NODEJS_20_X,
+            entry: path.join(lambdaAppDir, 'getPatientRecordById.ts'),
+            functionName: 'get-patient-record-lambda',
+        });
+
+        const getAllTaxRecordsLambda = new NodejsFunction(this, `get-all-tax-records-lambda`, {
+            runtime: Runtime.NODEJS_20_X,
+            entry: path.join(lambdaAppDir, 'getAllTaxRecords.ts'),
+            functionName: 'get-all-tax-records-lambda',
+        });
+
+        const getBankBalanceLambda = new NodejsFunction(this, `get-bank-balance-lambda`, {
+            runtime: Runtime.NODEJS_20_X,
+            entry: path.join(lambdaAppDir, 'getBankBalance.ts'),
+            functionName: 'get-bank-balance-lambda',
+        });
+
+        const payIncomeTaxLambda = new NodejsFunction(this, `pay-income-tax-lambda`, {
+            runtime: Runtime.NODEJS_20_X,
+            entry: path.join(lambdaAppDir, 'payIncomeTax.ts'),
+            functionName: 'pay-income-tax-lambda',
+        });
+
+        const payVatLambda = new NodejsFunction(this, `pay-vat-lambda`, {
+            runtime: Runtime.NODEJS_20_X,
+            entry: path.join(lambdaAppDir, 'payVat.ts'),
+            functionName: 'pay-vat-lambda',
+        });
+
+        const payDividendsLambda = new NodejsFunction(this, `pay-dividends-lambda`, {
+            runtime: Runtime.NODEJS_20_X,
+            entry: path.join(lambdaAppDir, 'payDividends.ts'),
+            functionName: 'pay-dividends-lambda',
+        });
+
+        const sellSharesLambda = new NodejsFunction(this, `sell-shares-lambda`, {
+            runtime: Runtime.NODEJS_20_X,
+            entry: path.join(lambdaAppDir, 'sellShares.ts'),
+            functionName: 'sell-shares-lambda',
+        });
+
+        const buySharesLambda = new NodejsFunction(this, `buy-shares-lambda`, {
+            runtime: Runtime.NODEJS_20_X,
+            entry: path.join(lambdaAppDir, 'buyShares.ts'),
+            functionName: 'buy-shares-lambda',
+        });
+
+        const chargeHealthInsuranceLambda = new NodejsFunction(this, `charge-health-insurance-lambda`, {
+            runtime: Runtime.NODEJS_20_X,
+            entry: path.join(lambdaAppDir, 'chargeHealthInsurance.ts'),
+            functionName: 'charge-health-insurance-lambda',
+        });
+
         // API
         const api = new RestApi(this, `${appName}-api-gateway`, {
             deployOptions: {stageName: 'prod', tracingEnabled: true},
@@ -122,6 +184,9 @@ export class BackendStack extends cdk.Stack {
         });
 
         const apiResource = api.root.addResource('api')
+        const patientResource = apiResource.addResource('patient')
+        const patientRecordResource = patientResource.addResource('record')
+        // Create patient endpoint
         const createPatientRequestModel = new Model(this, 'create-patient-request-model', {
             restApi: api,
             schema: {
@@ -140,16 +205,35 @@ export class BackendStack extends cdk.Stack {
         })
 
 
-        apiResource.addResource('patient')
-            .addMethod(HttpMethod.POST, new LambdaIntegration(createPatientLambda), {
-                requestValidator: createPatientValidator,
-                requestModels: {'application/json': createPatientRequestModel},
-                methodResponses: [{
-                    statusCode: '200', responseModels: {'application/json': Model.EMPTY_MODEL}
-                },
-                    {statusCode: '400', responseModels: {'application/json': Model.ERROR_MODEL}},
-                ],
-            })
+        patientResource.addMethod(HttpMethod.POST, new LambdaIntegration(createPatientLambda), {
+            requestValidator: createPatientValidator,
+            requestModels: {'application/json': createPatientRequestModel},
+            methodResponses: [{
+                statusCode: '200', responseModels: {'application/json': Model.EMPTY_MODEL}
+            },
+                {statusCode: '400', responseModels: {'application/json': Model.ERROR_MODEL}},
+            ],
+        })
 
+        // Get all patient records endpoint
+        patientRecordResource.addMethod(HttpMethod.GET, new LambdaIntegration(getAllPatientRecordsLambda));
+
+        // Get patient record by id
+        patientRecordResource.addResource('{personaId}').addMethod(HttpMethod.GET, new LambdaIntegration(getPatientRecordByIdLambda));
+
+        // Get all tax records
+        apiResource.addResource('tax').addResource('record').addMethod(HttpMethod.GET, new LambdaIntegration(getAllTaxRecordsLambda));
+
+        // Get bank balance
+        apiResource.addResource('bank').addResource('balance').addMethod(HttpMethod.GET, new LambdaIntegration(getBankBalanceLambda));
+
+        // QUEUES
+
+        const chargeHealthInsuranceQueue = new Queue(this, 'charge-health-insurance', {
+            queueName: 'charge-health-insurance.fifo',
+            visibilityTimeout: Duration.hours(12),
+        })
+
+        chargeHealthInsuranceLambda.addEventSource(new SqsEventSource(chargeHealthInsuranceQueue, {batchSize: 1}))
     }
 }
