@@ -1,6 +1,6 @@
 CREATE VIEW PatientRecordView AS
 SELECT
-    p.personalId,
+    p.personaId,
     p.isAdmitted,
     r.date,
     t.name AS treatmentName,
@@ -9,6 +9,6 @@ SELECT
 FROM
     Persona p
 JOIN
-    Record r ON p.personalId = r.personalId
+    Record r ON p.personaId = r.personaId
 JOIN
     Treatment t ON r.treatmentId = t.treatmentId;
