@@ -1,3 +1,3 @@
-export const payIncomeTax = () => {
+export const handler = () => {
 
 };

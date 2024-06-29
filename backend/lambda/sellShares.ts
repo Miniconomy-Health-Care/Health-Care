@@ -1,3 +1,3 @@
-export const sellShares = () => {
+export const handler = () => {
 
 };
