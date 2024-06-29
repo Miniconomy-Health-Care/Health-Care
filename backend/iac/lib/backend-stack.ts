@@ -1,28 +1,28 @@
 import * as cdk from 'aws-cdk-lib';
 import {aws_ec2 as ec2, aws_iam as iam, aws_rds as rds, Duration} from 'aws-cdk-lib';
 import {Construct} from 'constructs';
-import {GitHubStackProps} from "./githubStackProps";
-import {JsonSchemaType, LambdaIntegration, Model, RequestValidator, RestApi} from "aws-cdk-lib/aws-apigateway";
-import {Runtime} from "aws-cdk-lib/aws-lambda";
-import {HttpMethod} from "aws-cdk-lib/aws-apigatewayv2";
-import {Effect, PolicyDocument, PolicyStatement} from "aws-cdk-lib/aws-iam";
-import {NodejsFunction} from "aws-cdk-lib/aws-lambda-nodejs";
-import * as path from "path";
-import {Queue} from "aws-cdk-lib/aws-sqs";
-import {SqsEventSource} from "aws-cdk-lib/aws-lambda-event-sources";
+import {GitHubStackProps} from './githubStackProps';
+import {JsonSchemaType, LambdaIntegration, Model, RequestValidator, RestApi} from 'aws-cdk-lib/aws-apigateway';
+import {Runtime} from 'aws-cdk-lib/aws-lambda';
+import {HttpMethod} from 'aws-cdk-lib/aws-apigatewayv2';
+import {Effect, PolicyDocument, PolicyStatement} from 'aws-cdk-lib/aws-iam';
+import {NodejsFunction, NodejsFunctionProps} from 'aws-cdk-lib/aws-lambda-nodejs';
+import * as path from 'path';
+import {Queue} from 'aws-cdk-lib/aws-sqs';
+import {SqsEventSource} from 'aws-cdk-lib/aws-lambda-event-sources';
 
 export class BackendStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: GitHubStackProps) {
         super(scope, id, props);
 
-        const appName = "health-care"
+        const appName = 'health-care';
 
         //VPC
         const vpc = new ec2.Vpc(this, `${appName}-vpc`, {
             maxAzs: 2,
             subnetConfiguration: [
                 {
-                    name: "HealthCarePublicSubnet",
+                    name: 'HealthCarePublicSubnet',
                     subnetType: ec2.SubnetType.PUBLIC,
                 },
             ],
@@ -54,18 +54,18 @@ export class BackendStack extends cdk.Stack {
             allocatedStorage: 20,
             publiclyAccessible: true,
             deletionProtection: false,
-            credentials: rds.Credentials.fromGeneratedSecret("postgres", {
+            credentials: rds.Credentials.fromGeneratedSecret('postgres', {
                 secretName: `${appName}-db-secret`,
             }),
             securityGroups: [securityGrouup],
         });
 
         //Github deploy role
-        const githubDomain = "token.actions.githubusercontent.com";
+        const githubDomain = 'token.actions.githubusercontent.com';
 
-        const ghProvider = new iam.OpenIdConnectProvider(this, "githubProvider", {
+        const ghProvider = new iam.OpenIdConnectProvider(this, 'githubProvider', {
             url: `https://${githubDomain}`,
-            clientIds: ["sts.amazonaws.com"],
+            clientIds: ['sts.amazonaws.com'],
         });
 
         const iamRepoDeployAccess = props?.repositoryConfig.map(
@@ -78,8 +78,8 @@ export class BackendStack extends cdk.Stack {
             },
         };
 
-        const elbUpdatesPolicy = iam.ManagedPolicy.fromAwsManagedPolicyName('AWSElasticBeanstalkManagedUpdatesCustomerRolePolicy')
-        const elbWebTierPolicy = iam.ManagedPolicy.fromAwsManagedPolicyName('AWSElasticBeanstalkWebTier')
+        const elbUpdatesPolicy = iam.ManagedPolicy.fromAwsManagedPolicyName('AWSElasticBeanstalkManagedUpdatesCustomerRolePolicy');
+        const elbWebTierPolicy = iam.ManagedPolicy.fromAwsManagedPolicyName('AWSElasticBeanstalkWebTier');
 
         new iam.Role(this, `${appName}-deploy-role`, {
             assumedBy: new iam.WebIdentityPrincipal(
@@ -87,17 +87,17 @@ export class BackendStack extends cdk.Stack {
                 conditions
             ),
             inlinePolicies: {
-                "deployPolicy": new PolicyDocument({
+                'deployPolicy': new PolicyDocument({
                     statements: [
                         new PolicyStatement({
-                            actions: ["sts:AssumeRole"],
+                            actions: ['sts:AssumeRole'],
                             effect: Effect.ALLOW,
-                            resources: ["arn:aws:iam::*:role/cdk-*"]
+                            resources: ['arn:aws:iam::*:role/cdk-*']
                         }),
                         new PolicyStatement({
-                            actions: ["secretsmanager:GetSecretValue"],
+                            actions: ['secretsmanager:GetSecretValue'],
                             effect: Effect.ALLOW,
-                            resources: ["*"]
+                            resources: ['*']
                         })
                     ],
                 }),
@@ -109,68 +109,84 @@ export class BackendStack extends cdk.Stack {
             maxSessionDuration: cdk.Duration.hours(1),
         });
         //Lambdas
-        const lambdaAppDir = path.resolve(__dirname, '../../lambda')
-        const createPatientLambda = new NodejsFunction(this, `create-patient-lambda`, {
+        const lambdaEnv = {
+            'DB_SECRET': dbInstance.secret?.secretArn!
+        };
+
+        const lambdaAppDir = path.resolve(__dirname, '../../lambda');
+
+        const createLambda = (id: string, props: NodejsFunctionProps) => {
+            const fn = new NodejsFunction(this, id, {
+                environment: lambdaEnv,
+                ...props
+            });
+
+            dbInstance.secret?.grantRead(fn);
+
+            return fn;
+        };
+
+        const createPatientLambda = createLambda(`create-patient-lambda`, {
             runtime: Runtime.NODEJS_20_X,
             entry: path.join(lambdaAppDir, 'createPatient.ts'),
             functionName: 'create-patient-lambda',
         });
 
-        const getAllPatientRecordsLambda = new NodejsFunction(this, `get-all-patient-records-lambda`, {
+        const getAllPatientRecordsLambda = createLambda(`get-all-patient-records-lambda`, {
             runtime: Runtime.NODEJS_20_X,
             entry: path.join(lambdaAppDir, 'getAllPatientRecords.ts'),
             functionName: 'get-all-patient-records-lambda',
         });
 
-        const getPatientRecordByIdLambda = new NodejsFunction(this, `get-patient-record-lambda`, {
+        const getPatientRecordByIdLambda = createLambda(`get-patient-record-lambda`, {
             runtime: Runtime.NODEJS_20_X,
             entry: path.join(lambdaAppDir, 'getPatientRecordById.ts'),
             functionName: 'get-patient-record-lambda',
         });
 
-        const getAllTaxRecordsLambda = new NodejsFunction(this, `get-all-tax-records-lambda`, {
+        const getAllTaxRecordsLambda = createLambda(`get-all-tax-records-lambda`, {
             runtime: Runtime.NODEJS_20_X,
             entry: path.join(lambdaAppDir, 'getAllTaxRecords.ts'),
             functionName: 'get-all-tax-records-lambda',
         });
 
-        const getBankBalanceLambda = new NodejsFunction(this, `get-bank-balance-lambda`, {
+        const getBankBalanceLambda = createLambda(`get-bank-balance-lambda`, {
             runtime: Runtime.NODEJS_20_X,
             entry: path.join(lambdaAppDir, 'getBankBalance.ts'),
             functionName: 'get-bank-balance-lambda',
         });
 
-        const payIncomeTaxLambda = new NodejsFunction(this, `pay-income-tax-lambda`, {
+        const payIncomeTaxLambda = createLambda(`pay-income-tax-lambda`, {
             runtime: Runtime.NODEJS_20_X,
             entry: path.join(lambdaAppDir, 'payIncomeTax.ts'),
             functionName: 'pay-income-tax-lambda',
         });
 
-        const payVatLambda = new NodejsFunction(this, `pay-vat-lambda`, {
+        const payVatLambda = createLambda(`pay-vat-lambda`, {
             runtime: Runtime.NODEJS_20_X,
             entry: path.join(lambdaAppDir, 'payVat.ts'),
             functionName: 'pay-vat-lambda',
         });
 
-        const payDividendsLambda = new NodejsFunction(this, `pay-dividends-lambda`, {
+        const payDividendsLambda = createLambda(`pay-dividends-lambda`, {
             runtime: Runtime.NODEJS_20_X,
             entry: path.join(lambdaAppDir, 'payDividends.ts'),
             functionName: 'pay-dividends-lambda',
         });
 
-        const sellSharesLambda = new NodejsFunction(this, `sell-shares-lambda`, {
+        const sellSharesLambda = createLambda(`sell-shares-lambda`, {
             runtime: Runtime.NODEJS_20_X,
             entry: path.join(lambdaAppDir, 'sellShares.ts'),
             functionName: 'sell-shares-lambda',
         });
 
-        const buySharesLambda = new NodejsFunction(this, `buy-shares-lambda`, {
+        const buySharesLambda = createLambda(`buy-shares-lambda`, {
             runtime: Runtime.NODEJS_20_X,
             entry: path.join(lambdaAppDir, 'buyShares.ts'),
             functionName: 'buy-shares-lambda',
         });
 
-        const chargeHealthInsuranceLambda = new NodejsFunction(this, `charge-health-insurance-lambda`, {
+        const chargeHealthInsuranceLambda = createLambda(`charge-health-insurance-lambda`, {
             runtime: Runtime.NODEJS_20_X,
             entry: path.join(lambdaAppDir, 'chargeHealthInsurance.ts'),
             functionName: 'charge-health-insurance-lambda',
@@ -183,9 +199,9 @@ export class BackendStack extends cdk.Stack {
             defaultMethodOptions: {},
         });
 
-        const apiResource = api.root.addResource('api')
-        const patientResource = apiResource.addResource('patient')
-        const patientRecordResource = patientResource.addResource('record')
+        const apiResource = api.root.addResource('api');
+        const patientResource = apiResource.addResource('patient');
+        const patientRecordResource = patientResource.addResource('record');
         // Create patient endpoint
         const createPatientRequestModel = new Model(this, 'create-patient-request-model', {
             restApi: api,
@@ -202,7 +218,7 @@ export class BackendStack extends cdk.Stack {
         const createPatientValidator = new RequestValidator(this, 'create-patient-validator', {
             restApi: api,
             validateRequestBody: true
-        })
+        });
 
 
         patientResource.addMethod(HttpMethod.POST, new LambdaIntegration(createPatientLambda), {
@@ -213,7 +229,7 @@ export class BackendStack extends cdk.Stack {
             },
                 {statusCode: '400', responseModels: {'application/json': Model.ERROR_MODEL}},
             ],
-        })
+        });
 
         // Get all patient records endpoint
         patientRecordResource.addMethod(HttpMethod.GET, new LambdaIntegration(getAllPatientRecordsLambda));
@@ -232,8 +248,8 @@ export class BackendStack extends cdk.Stack {
         const chargeHealthInsuranceQueue = new Queue(this, 'charge-health-insurance', {
             queueName: 'charge-health-insurance.fifo',
             visibilityTimeout: Duration.hours(12),
-        })
+        });
 
-        chargeHealthInsuranceLambda.addEventSource(new SqsEventSource(chargeHealthInsuranceQueue, {batchSize: 1}))
+        chargeHealthInsuranceLambda.addEventSource(new SqsEventSource(chargeHealthInsuranceQueue, {batchSize: 1}));
     }
 }

@@ -1,3 +1,3 @@
-export const payVat = () => {
+export const handler = () => {
 
 };

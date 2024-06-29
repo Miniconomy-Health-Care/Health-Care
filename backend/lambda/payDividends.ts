@@ -1,3 +1,2 @@
-export const payDividends = () => {
-
+export const handler = async () => {
 };
