@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppBar, Toolbar, Typography, Container, Grid, Paper, Box, Drawer, List, ListItem, ListItemIcon, ListItemText, InputBase, IconButton } from '@mui/material';
-import { Link, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import { Dashboard, Category, Search, People, Inventory, Report, Settings } from '@mui/icons-material';
 import './App.css';
+
+import Cookies from "js-cookie";
+import { authLogin } from './auth/login'
 
 import Home from './components/Home';
 import Patients from './components/Patients';
@@ -10,17 +13,38 @@ import Taxes from './components/Taxes';
 import Stocks from './components/Stocks';
 
 const App = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  
+  const[isAutheticated, setisAutheticated] = useState(false);
+  const location = useLocation();
 
-  const login = () => {
-    // Logic for authentication
-    setIsAuthenticated(true);
-  };
+  function login(){
+    authLogin()
+  }
 
-  const logout = () => {
-    setIsAuthenticated(false);
-    alert("Logged out successfully!");
-  };
+  function logout(){
+    setisAutheticated(false);
+  }
+
+  useEffect(() => {
+
+    const validateToken = async () => {
+      if(Cookies.get("jwt")){
+        const response = await (await fetch("http://localhost:8080/verifyToken")).json()
+        if(response.valid === true){
+          setisAutheticated(true);
+        }
+        else{
+          setisAutheticated(false);
+        }
+      }
+      else{
+        setisAutheticated(false);
+      }
+    }
+
+    validateToken();
+    
+  }, [location]);
 
   const drawerItems = [
     { text: 'Dashboard', icon: <Dashboard />, route: '/Home' },
@@ -67,6 +91,13 @@ const App = () => {
             
           </Typography>
         </div>
+        
+        {!isAutheticated && <div>
+          <button onClick={login}>Login</button>
+          <br/>
+          <button onClick={logout}>Logout</button>
+        </div>}
+        
         <List>
           {drawerItems.map((item, index) => (
             <ListItem button key={item.text} component={Link} to={item.route}>
@@ -83,11 +114,11 @@ const App = () => {
       <main className="content">
         <div className="toolbar" />
         <Routes>
+          <Route path="/" element={<Navigate to="/Home" replace/>}/>
           <Route path="/Home" element={<Home />} />
-          <Route path="/Patients" element={<Patients />} />
-          <Route path="/Taxes" element={<Taxes />} />
-          <Route path="/Stocks" element={<Stocks />} />
-          <Route path="/" element={<Home />} />
+          <Route path="/Patients" element={ isAutheticated ? <Patients/> : <Navigate to="/Home" /> } />
+          <Route path="/Taxes" element={ isAutheticated ? <Taxes/> : <Navigate to="/Home" /> }  />
+          <Route path="/Stocks" element={ isAutheticated ? <Stocks/> : <Navigate to="/Home" /> }  />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
