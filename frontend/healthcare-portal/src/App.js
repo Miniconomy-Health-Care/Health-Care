@@ -1,69 +1,102 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { AppBar, Toolbar, Typography, Container, Grid, Paper, Box, Drawer, List, ListItem, ListItemIcon, ListItemText, InputBase, IconButton } from '@mui/material';
+import { Link, Routes, Route, Navigate } from 'react-router-dom';
+import { Dashboard, Category, Search, People, Inventory, Report, Settings } from '@mui/icons-material';
+import './App.css';
 
 import Home from './components/Home';
 import Patients from './components/Patients';
-import Income from './components/Income';
+import Taxes from './components/Taxes';
+import Stocks from './components/Stocks';
 
-import { authLogin } from './auth/login'
+const App = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-import { Routes, Route, Link, Navigate } from 'react-router-dom';
+  const login = () => {
+    // Logic for authentication
+    setIsAuthenticated(true);
+  };
 
-function NotFound() {
-  return <div><h1>404 - Not Found</h1></div>;
-}
+  const logout = () => {
+    setIsAuthenticated(false);
+    alert("Logged out successfully!");
+  };
 
-function App() {
-
-  const[isAutheticated, setisAutheticated] = useState(false);
-
-  function login(){
-    authLogin()
-  }
-
-  function logout(){
-    setisAutheticated(false);
-    alert("2");
-  }
-
-  /*function Test(){
-    let { code } = useParams();
-    alert(code);
-  }*/
+  const drawerItems = [
+    { text: 'Dashboard', icon: <Dashboard />, route: '/Home' },
+    { text: 'Personas', icon: <Category />, route: '/Patients' }, // Link to Patients.js renamed to Personas
+    { text: 'Taxes', icon: <Category />, route: '/Taxes' }, // Link to Taxes.js
+    { text: 'Stocks', icon: <Category />, route: '/Stocks' }, // Link to Stocks.js
+  ];
 
   return (
     <div>
+      {/* Search Bar */}
+      <AppBar position="fixed" className="appBar">
+        <Toolbar>
+          <Typography variant="h6" className="title">
+            Healthcare Admin Portal
+          </Typography>
+          <div className="search">
+            <div className="searchIcon">
+              <IconButton>
+                <Search />
+              </IconButton>
+            </div>
+            <InputBase
+              placeholder="Search..."
+              classes={{
+                root: 'inputRoot',
+                input: 'inputInput',
+              }}
+              inputProps={{ 'aria-label': 'search' }}
+            />
+          </div>
+        </Toolbar>
+      </AppBar>
 
-      <div>
-        <Link to="/Home">Home</Link>
-        <Link to="/Patients">Patients</Link>
-        <Link to="/Income">Income</Link>
-      </div>
+      {/* Drawer */}
+      <Drawer
+        variant="permanent"
+        classes={{
+          paper: 'drawerPaper',
+        }}
+      >
+        <div className="toolbar">
+          <Typography variant="h6" className="drawerTitle">
+          
+          </Typography>
+        </div>
+        <List>
+          {drawerItems.map((item, index) => (
+            <ListItem button key={item.text} component={Link} to={item.route}>
+              <ListItemIcon style={{ color: '#fff' }}>
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText primary={item.text} />
+            </ListItem>
+          ))}
+        </List>
+      </Drawer>
 
-      <div>
-        <button onClick={login}>Login</button>
-        <br/>
-        <button onClick={logout}>Logout</button>
-      </div>
-
-      {/*<Routes>
-        <Route path="/Home" element={ <Home/> } />
-        <Route path="/Patients" element={ isAutheticated ? <Patients/> : <Navigate to="/Home" /> } />
-        <Route path="/Income" element={ isAutheticated ? <Income/> : <Navigate to="/Home" /> } />
-        <Route path="/" element={ <Home/> } />
-        <Route path="/:code?" element={ <Test/>} />
-        <Route path="*" element={<NotFound />} />
-  </Routes>*/}
-      
-      <Routes>
-        <Route path="/Home" element={ <Home/> } />
-        <Route path="/Patients" element={ <Patients/>} />
-        <Route path="/Income" element={ <Income/>} />
-        <Route path="/" element={ <Home/> } />
-        <Route path="*" element={<NotFound />} />
-  </Routes>
-      
+      {/* Main Content */}
+      <main className="content">
+        <div className="toolbar" />
+        <Routes>
+          <Route path="/Home" element={<Home />} />
+          <Route path="/Patients" element={isAuthenticated ? <Patients /> : <Navigate to="/Home" />} />
+          <Route path="/Taxes" element={<Taxes />} />
+          <Route path="/Stocks" element={<Stocks />} />
+          <Route path="/" element={<Home />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </main>
     </div>
   );
+};
+
+function NotFound() {
+  return <div><h1>404 - Not Found</h1></div>;
 }
 
 export default App;
