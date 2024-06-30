@@ -1,5 +1,6 @@
 import React from 'react';
 import TableTemplate from './TableTemplate'; // Path to your BasicTable component
+//import './Patients.css';
 
 const Patients = () => {
   const columns = ['Record ID', 'Personal ID', 'Date', 'Treatment Name', 'Problem', 'Cost'];

@@ -64,7 +64,7 @@ const App = () => {
       >
         <div className="toolbar">
           <Typography variant="h6" className="drawerTitle">
-          
+            
           </Typography>
         </div>
         <List>
@@ -84,7 +84,7 @@ const App = () => {
         <div className="toolbar" />
         <Routes>
           <Route path="/Home" element={<Home />} />
-          <Route path="/Patients" element={isAuthenticated ? <Patients /> : <Navigate to="/Home" />} />
+          <Route path="/Patients" element={<Patients />} />
           <Route path="/Taxes" element={<Taxes />} />
           <Route path="/Stocks" element={<Stocks />} />
           <Route path="/" element={<Home />} />
