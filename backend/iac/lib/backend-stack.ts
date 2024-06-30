@@ -8,8 +8,9 @@ import {HttpMethod} from 'aws-cdk-lib/aws-apigatewayv2';
 import {Effect, PolicyDocument, PolicyStatement} from 'aws-cdk-lib/aws-iam';
 import {NodejsFunction, NodejsFunctionProps} from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as path from 'path';
-import {Queue} from 'aws-cdk-lib/aws-sqs';
 import {SqsEventSource} from 'aws-cdk-lib/aws-lambda-event-sources';
+import {Queue} from 'aws-cdk-lib/aws-sqs';
+import {Secret} from 'aws-cdk-lib/aws-secretsmanager';
 
 export class BackendStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: GitHubStackProps) {
@@ -60,6 +61,16 @@ export class BackendStack extends cdk.Stack {
             securityGroups: [securityGrouup],
         });
 
+        //Secret
+
+        const certSecret = new Secret(this, 'cert-secret', {
+            secretName: 'cert-secret',
+        });
+
+        const keySecret = new Secret(this, 'key-secret', {
+            secretName: 'key-secret'
+        });
+
         //Github deploy role
         const githubDomain = 'token.actions.githubusercontent.com';
 
@@ -108,9 +119,20 @@ export class BackendStack extends cdk.Stack {
                 'This role is used via GitHub Actions to deploy with AWS CDK',
             maxSessionDuration: cdk.Duration.hours(1),
         });
+
+        // QUEUES
+        const chargeHealthInsuranceQueue = new Queue(this, 'charge-health-insurance', {
+            queueName: 'charge-health-insurance.fifo',
+            visibilityTimeout: Duration.minutes(15),
+            contentBasedDeduplication: true,
+        });
+
         //Lambdas
         const lambdaEnv = {
-            'DB_SECRET': dbInstance.secret?.secretArn!
+            'DB_SECRET': dbInstance.secret?.secretArn!,
+            'CERT_SECRET': certSecret.secretArn,
+            'KEY_SECRET': keySecret.secretArn,
+            'CHARGE_HEALTH_INSURANCE_QUEUE_URL': chargeHealthInsuranceQueue.queueUrl
         };
 
         const lambdaAppDir = path.resolve(__dirname, '../../lambda');
@@ -122,6 +144,8 @@ export class BackendStack extends cdk.Stack {
             });
 
             dbInstance.secret?.grantRead(fn);
+            certSecret.grantRead(fn);
+            keySecret.grantRead(fn);
 
             return fn;
         };
@@ -243,13 +267,9 @@ export class BackendStack extends cdk.Stack {
         // Get bank balance
         apiResource.addResource('bank').addResource('balance').addMethod(HttpMethod.GET, new LambdaIntegration(getBankBalanceLambda));
 
-        // QUEUES
 
-        const chargeHealthInsuranceQueue = new Queue(this, 'charge-health-insurance', {
-            queueName: 'charge-health-insurance.fifo',
-            visibilityTimeout: Duration.hours(12),
-        });
-
+        // QUEUE Configs
         chargeHealthInsuranceLambda.addEventSource(new SqsEventSource(chargeHealthInsuranceQueue, {batchSize: 1}));
+        chargeHealthInsuranceQueue.grantSendMessages(createPatientLambda);
     }
 }
