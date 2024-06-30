@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import Home from './components/Home';
 import Patients from './components/Patients';
 import Income from './components/Income';
+import Cookies from "js-cookie";
 
 import { authLogin } from './auth/login'
 
-import { Routes, Route, Link, Navigate } from 'react-router-dom';
+import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 
 function NotFound() {
   return <div><h1>404 - Not Found</h1></div>;
@@ -15,6 +16,7 @@ function NotFound() {
 function App() {
 
   const[isAutheticated, setisAutheticated] = useState(false);
+  const location = useLocation();
 
   function login(){
     authLogin()
@@ -22,13 +24,28 @@ function App() {
 
   function logout(){
     setisAutheticated(false);
-    alert("2");
   }
 
-  /*function Test(){
-    let { code } = useParams();
-    alert(code);
-  }*/
+  useEffect(() => {
+
+    const validateToken = async () => {
+      if(Cookies.get("jwt")){
+        const response = await (await fetch("http://localhost:8080/verifyToken")).json()
+        if(response.valid === true){
+          setisAutheticated(true);
+        }
+        else{
+          setisAutheticated(false);
+        }
+      }
+      else{
+        setisAutheticated(false);
+      }
+    }
+
+    validateToken();
+    
+  }, [location]);
 
   return (
     <div>
@@ -39,28 +56,19 @@ function App() {
         <Link to="/Income">Income</Link>
       </div>
 
-      <div>
+      {!isAutheticated && <div>
         <button onClick={login}>Login</button>
         <br/>
         <button onClick={logout}>Logout</button>
-      </div>
+      </div>}
 
-      {/*<Routes>
+      <Routes>
+        <Route path="/" element={<Navigate to="/Home" replace/>}/>
         <Route path="/Home" element={ <Home/> } />
         <Route path="/Patients" element={ isAutheticated ? <Patients/> : <Navigate to="/Home" /> } />
         <Route path="/Income" element={ isAutheticated ? <Income/> : <Navigate to="/Home" /> } />
-        <Route path="/" element={ <Home/> } />
-        <Route path="/:code?" element={ <Test/>} />
         <Route path="*" element={<NotFound />} />
-  </Routes>*/}
-      
-      <Routes>
-        <Route path="/Home" element={ <Home/> } />
-        <Route path="/Patients" element={ <Patients/>} />
-        <Route path="/Income" element={ <Income/>} />
-        <Route path="/" element={ <Home/> } />
-        <Route path="*" element={<NotFound />} />
-  </Routes>
+      </Routes>
       
     </div>
   );
