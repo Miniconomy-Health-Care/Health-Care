@@ -36,6 +36,12 @@ CREATE TABLE Tax (
     amount NUMERIC
 );
 
+CREATE TABLE Time
+(
+    timeId    SERIAL PRIMARY KEY,
+    startTime BIGINT
+);
+
 ALTER TABLE Record
 ADD CONSTRAINT fk_personaId
 FOREIGN KEY (personaId)
