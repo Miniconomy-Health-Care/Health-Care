@@ -18,8 +18,29 @@ const app = express();
 app.use(authMiddleware, express.static(path.join(__dirname, 'build')));
 app.use(cookieParser());
 
-app.get('/test', function (req, res) {
+app.get('/test', (req, res) => {
     res.send('Health Care Portal Working!');
+});
+
+app.get('/verifyToken', async (req, res) => {
+
+  let response = {};
+
+  if(req.cookies && req.cookies.jwt){
+    let isTokenValid = await verifyToken(req.cookies.jwt);
+
+    response = {
+      valid: isTokenValid
+    };
+  }
+  else{
+    response = {
+      valid: false
+    };
+  }
+
+  res.json(response);
+  
 });
 
 app.get('*', async (req, res) => {
@@ -37,7 +58,7 @@ app.get('*', async (req, res) => {
 
     if (code) {
       let token = await getToken(code);
-      res.cookie('jwt', token, { httpOnly: true, secure: true, maxAge: 3600000 });
+      res.cookie('jwt', token, { httpOnly: false, secure: true, maxAge: 3600000 });
       res.redirect('/Home');
 
     }
