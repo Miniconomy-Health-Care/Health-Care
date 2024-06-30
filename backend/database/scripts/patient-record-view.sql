@@ -2,6 +2,7 @@ CREATE VIEW PatientRecordView AS
 SELECT
     p.personaId,
     p.isAdmitted,
+    r.recordId,
     r.date,
     t.name AS treatmentName,
 	t.problem,
