@@ -5,7 +5,7 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
 
 
     const pool = await getSqlPool();
-    const patientId = event.pathParameters?.id;
+    const patientId = event.pathParameters?.personaId;
 
     if (!patientId) {
         return {
