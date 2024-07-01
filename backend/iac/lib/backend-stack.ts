@@ -180,6 +180,7 @@ export class BackendStack extends cdk.Stack {
             const fn = new NodejsFunction(this, id, {
                 runtime: Runtime.NODEJS_20_X,
                 environment: lambdaEnv,
+                bundling: {nodeModules: ['pg']},
                 ...props
             });
 
