@@ -239,6 +239,11 @@ export class BackendStack extends cdk.Stack {
             entry: path.join(lambdaAppDir, 'timeEventCoordinator.ts'),
             functionName: 'time-event-coordinator-lambda',
         });
+        
+        const syncTimeLambda = createLambda('sync-time-lambda', {
+            entry: path.join(lambdaAppDir, 'syncTime.ts'),
+            functionName: 'sync-time-lambda',
+        });
 
         //Event bridge rules
         const dailyRule = new Rule(this, 'daily-rule', {
@@ -246,6 +251,12 @@ export class BackendStack extends cdk.Stack {
         });
         addLambdaPermission(dailyRule, timeEventCoordinatorLambda);
         dailyRule.addTarget(new LambdaFunction(timeEventCoordinatorLambda));
+
+        const syncTimeRule = new Rule(this, 'sync-time-rule', {
+            schedule: Schedule.rate(Duration.minutes(30))
+        });
+        addLambdaPermission(syncTimeRule, syncTimeLambda);
+        syncTimeRule.addTarget(new LambdaFunction(syncTimeLambda));
 
         // API
         const api = new RestApi(this, `${appName}-api-gateway`, {
