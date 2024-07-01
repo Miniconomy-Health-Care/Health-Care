@@ -40,6 +40,7 @@ jobs:
         working-directory: frontend/healthcare-portal
         env:
           CI: ""
+          BUILD_PATH: ${{ vars.BUILD_PATH }}
         run: |
           npm ci
           npm run build 
