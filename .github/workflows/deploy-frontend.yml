@@ -1,4 +1,4 @@
-name: Deploy Backend
+name: Deploy Frontend
 
 on:
   push:
@@ -33,11 +33,13 @@ jobs:
         run: npm install -g aws-cdk
  
       - name: Install dependencies server
-        working-directory: frontend/healthcare-server
+        working-directory: frontend/healthcare-portal-server
         run: npm ci
         
       - name: Build portal
         working-directory: frontend/healthcare-portal
+        env:
+          CI: ""
         run: |
           npm ci
           npm run build 
