@@ -2,7 +2,14 @@ import * as cdk from 'aws-cdk-lib';
 import {aws_ec2 as ec2, aws_iam as iam, aws_rds as rds, Duration} from 'aws-cdk-lib';
 import {Construct} from 'constructs';
 import {GitHubStackProps} from './githubStackProps';
-import {JsonSchemaType, LambdaIntegration, Model, RequestValidator, RestApi} from 'aws-cdk-lib/aws-apigateway';
+import {
+    JsonSchemaType,
+    LambdaIntegration,
+    Model,
+    RequestValidator,
+    RestApi,
+    SecurityPolicy
+} from 'aws-cdk-lib/aws-apigateway';
 import {Runtime} from 'aws-cdk-lib/aws-lambda';
 import {HttpMethod} from 'aws-cdk-lib/aws-apigatewayv2';
 import {Effect, PolicyDocument, PolicyStatement} from 'aws-cdk-lib/aws-iam';
@@ -11,6 +18,8 @@ import * as path from 'path';
 import {SqsEventSource} from 'aws-cdk-lib/aws-lambda-event-sources';
 import {Queue} from 'aws-cdk-lib/aws-sqs';
 import {Secret} from 'aws-cdk-lib/aws-secretsmanager';
+import {Bucket} from 'aws-cdk-lib/aws-s3';
+import {Certificate} from 'aws-cdk-lib/aws-certificatemanager';
 import {Rule, Schedule} from 'aws-cdk-lib/aws-events';
 import {addLambdaPermission, LambdaFunction} from 'aws-cdk-lib/aws-events-targets';
 
@@ -259,14 +268,27 @@ export class BackendStack extends cdk.Stack {
         syncTimeRule.addTarget(new LambdaFunction(syncTimeLambda));
 
         // API
+        const domainName = 'api.care.projects.bbdgrad.com';
+
         const api = new RestApi(this, `${appName}-api-gateway`, {
             deployOptions: {stageName: 'prod', tracingEnabled: true},
             restApiName: `${appName}-api`,
-            defaultMethodOptions: {},
+            domainName: {
+                domainName: domainName,
+                certificate: Certificate.fromCertificateArn(this, 'api-cert', 'arn:aws:acm:eu-west-1:363615071302:certificate/8c0eecf5-8298-4521-990a-9fc3c9d54dd7'),
+                mtls: {
+                    bucket: Bucket.fromBucketName(this, 'truststore-bucket', 'miniconomy-trust-store-bucket'),
+                    key: 'truststore.pem'
+                },
+                securityPolicy: SecurityPolicy.TLS_1_2
+            }
         });
 
+        //TODO copy to new api and update resource linking
         const apiResource = api.root.addResource('api');
+        //TODO copy to new api and update resource linking
         const patientResource = apiResource.addResource('patient');
+        //TODO move to new api
         const patientRecordResource = patientResource.addResource('record');
         // Create patient endpoint
         const createPatientRequestModel = new Model(this, 'create-patient-request-model', {
