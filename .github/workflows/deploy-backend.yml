@@ -31,8 +31,10 @@ jobs:
       - name: Install global dependencies
         run: npm install -g aws-cdk
 
+      - name: Install dependencies
+        working-directory: backend
+        run: npm ci
+
       - name: Deploy backend
         working-directory: backend/iac
-        run: |
-          npm ci
-          cdk deploy --require-approval never
+        run: cdk deploy --require-approval never
