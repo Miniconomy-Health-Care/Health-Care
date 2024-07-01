@@ -3,7 +3,7 @@ import * as elasticbeanstalk from 'aws-cdk-lib/aws-elasticbeanstalk';
 import * as s3assets from 'aws-cdk-lib/aws-s3-assets';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
-import { Construct } from 'constructs';
+import {Construct} from 'constructs';
 
 export interface EBEnvProps extends cdk.StackProps {
   minSize?: string;
@@ -110,6 +110,31 @@ export class HealthcarePortalCdkStack extends cdk.Stack {
           namespace: 'aws:ec2:instances',
           optionName: 'InstanceTypes',
           value: 't2.micro',
+      },
+      {
+        namespace: 'aws:elasticbeanstalk:application:environment',
+        optionName: 'HEALTHCARE_REDIRECT_URI',
+        value: 'https://care.projects.bbdgrad.com/Home'
+      },
+      {
+        namespace: 'aws:elb:listener:443',
+        optionName: 'ListenerProtocol',
+        value: 'HTTPS'
+      },
+      {
+        namespace: 'aws:elb:listener:443',
+        optionName: 'InstancePort',
+        value: '80'
+      },
+      {
+        namespace: 'aws:elb:listener:443',
+        optionName: 'InstanceProtocol',
+        value: 'HTTP'
+      },
+      {
+        namespace: 'aws:elb:listener:443',
+        optionName: 'SSLCertificateId',
+        value: 'arn:aws:acm:eu-west-1:363615071302:certificate/bc9d7875-938e-44b1-a154-e967e997f7a7'
       },
     ];
 

@@ -1,11 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { AppBar, Toolbar, Typography, Container, Grid, Paper, Box, Drawer, List, ListItem, ListItemIcon, ListItemText, InputBase, IconButton } from '@mui/material';
-import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
-import { Dashboard, Category, Search, People, Inventory, Report, Settings } from '@mui/icons-material';
+import React, {useEffect, useState} from 'react';
+import {
+  AppBar,
+  Drawer,
+  IconButton,
+  InputBase,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Toolbar,
+  Typography
+} from '@mui/material';
+import {Link, Navigate, Route, Routes, useLocation} from 'react-router-dom';
+import {Category, Dashboard, Search} from '@mui/icons-material';
 import './App.css';
 
 import Cookies from "js-cookie";
-import { authLogin } from './auth/login'
 
 import Home from './components/Home';
 import Patients from './components/Patients';
@@ -17,33 +27,14 @@ const App = () => {
   const[isAutheticated, setisAutheticated] = useState(false);
   const location = useLocation();
 
-  function login(){
-    authLogin()
-  }
-
   function logout(){
+    Cookies.remove('jwt');
     setisAutheticated(false);
+    window.location.reload()
   }
 
   useEffect(() => {
-
-    const validateToken = async () => {
-      if(Cookies.get("jwt")){
-        const response = await (await fetch("http://localhost:8080/verifyToken")).json()
-        if(response.valid === true){
-          setisAutheticated(true);
-        }
-        else{
-          setisAutheticated(false);
-        }
-      }
-      else{
-        setisAutheticated(false);
-      }
-    }
-
-    validateToken();
-    
+    setisAutheticated(true);
   }, [location]);
 
   const drawerItems = [
@@ -91,12 +82,10 @@ const App = () => {
             
           </Typography>
         </div>
-        
-        {!isAutheticated && <div>
-          <button onClick={login}>Login</button>
-          <br/>
+
+        <div>
           <button onClick={logout}>Logout</button>
-        </div>}
+        </div>
         
         <List>
           {drawerItems.map((item, index) => (
