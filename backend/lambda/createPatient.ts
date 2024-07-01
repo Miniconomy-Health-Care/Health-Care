@@ -2,12 +2,13 @@ import {type APIGatewayProxyHandler} from 'aws-lambda';
 import {getSqlPool} from '../utils/dbUtils';
 import {sendQueueMessage} from '../utils/queueUtils';
 import assert from 'node:assert';
+import {getCurrentDate} from '../utils/timeUtils';
 
 export const handler: APIGatewayProxyHandler = async (event, context) => {
 
     const personaId = JSON.parse(event.body!)['personaId'];
     const pool = await getSqlPool();
-    const date = '01|02|03'; //TODO Fetch from Zeus/Own time keeper
+    const date = (await getCurrentDate()).str;
 
     const query = 'CALL add_patient_record($1, $2)';
     const result = await pool.query(query, [personaId, date]);
