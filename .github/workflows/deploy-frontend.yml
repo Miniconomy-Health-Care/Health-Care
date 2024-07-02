@@ -1,11 +1,11 @@
-name: Deploy Backend
+name: Deploy Frontend
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'backend/**'
+      - 'frontend/**'
   workflow_dispatch:
 
 jobs:
@@ -14,6 +14,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
+    environment: frontend
     steps:
       - uses: actions/checkout@v4.1.1
 
@@ -30,11 +31,21 @@ jobs:
 
       - name: Install global dependencies
         run: npm install -g aws-cdk
-
-      - name: Install dependencies
-        working-directory: backend
+ 
+      - name: Install dependencies server
+        working-directory: frontend/healthcare-portal-server
         run: npm ci
-
-      - name: Deploy backend
-        working-directory: backend/iac
-        run: cdk deploy --require-approval never
+        
+      - name: Build portal
+        working-directory: frontend/healthcare-portal
+        env:
+          CI: ""
+        run: |
+          npm ci
+          npm run build 
+          
+      - name: Deploy frontend
+        working-directory: frontend/healthcare-portal-cdk
+        run: |
+          npm ci
+          cdk deploy --require-approval never

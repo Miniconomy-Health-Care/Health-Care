@@ -8,8 +8,11 @@ import {HttpMethod} from 'aws-cdk-lib/aws-apigatewayv2';
 import {Effect, PolicyDocument, PolicyStatement} from 'aws-cdk-lib/aws-iam';
 import {NodejsFunction, NodejsFunctionProps} from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as path from 'path';
-import {Queue} from 'aws-cdk-lib/aws-sqs';
 import {SqsEventSource} from 'aws-cdk-lib/aws-lambda-event-sources';
+import {Queue} from 'aws-cdk-lib/aws-sqs';
+import {Secret} from 'aws-cdk-lib/aws-secretsmanager';
+import {Rule, Schedule} from 'aws-cdk-lib/aws-events';
+import {addLambdaPermission, LambdaFunction} from 'aws-cdk-lib/aws-events-targets';
 
 export class BackendStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: GitHubStackProps) {
@@ -60,6 +63,16 @@ export class BackendStack extends cdk.Stack {
             securityGroups: [securityGrouup],
         });
 
+        //Secret
+
+        const certSecret = new Secret(this, 'cert-secret', {
+            secretName: 'cert-secret',
+        });
+
+        const keySecret = new Secret(this, 'key-secret', {
+            secretName: 'key-secret'
+        });
+
         //Github deploy role
         const githubDomain = 'token.actions.githubusercontent.com';
 
@@ -108,89 +121,142 @@ export class BackendStack extends cdk.Stack {
                 'This role is used via GitHub Actions to deploy with AWS CDK',
             maxSessionDuration: cdk.Duration.hours(1),
         });
+
+        // QUEUES
+        const chargeHealthInsuranceQueue = new Queue(this, 'charge-health-insurance', {
+            queueName: 'charge-health-insurance.fifo',
+            visibilityTimeout: Duration.minutes(15),
+            contentBasedDeduplication: true,
+        });
+
+        const payIncomeTaxQueue = new Queue(this, 'pay-income-tax', {
+            queueName: 'pay-income-tax.fifo',
+            visibilityTimeout: Duration.minutes(5),
+            contentBasedDeduplication: true,
+        });
+        const payVatQueue = new Queue(this, 'pay-vat', {
+            queueName: 'pay-vat.fifo',
+            visibilityTimeout: Duration.minutes(5),
+            contentBasedDeduplication: true,
+        });
+
+        const buySharesQueue = new Queue(this, 'buy-shares', {
+            queueName: 'buy-shares.fifo',
+            visibilityTimeout: Duration.minutes(5),
+            contentBasedDeduplication: true,
+        });
+
+        const payDividendsQueue = new Queue(this, 'pay-dividends', {
+            queueName: 'pay-dividends.fifo',
+            visibilityTimeout: Duration.minutes(5),
+            contentBasedDeduplication: true,
+        });
+
         //Lambdas
         const lambdaEnv = {
-            'DB_SECRET': dbInstance.secret?.secretArn!
+            'DB_SECRET': dbInstance.secret?.secretArn!,
+            'CERT_SECRET': certSecret.secretArn,
+            'KEY_SECRET': keySecret.secretArn,
+            'CHARGE_HEALTH_INSURANCE_QUEUE_URL': chargeHealthInsuranceQueue.queueUrl,
+            'PAY_INCOME_TAX_QUEUE_URL': payIncomeTaxQueue.queueUrl,
+            'PAY_VAT_QUEUE_URL': payVatQueue.queueUrl,
+            'BUY_SHARES_QUEUE_URL': buySharesQueue.queueUrl,
+            'PAY_DIVIDENDS_QUEUE_URL': payDividendsQueue.queueUrl
         };
 
         const lambdaAppDir = path.resolve(__dirname, '../../lambda');
 
         const createLambda = (id: string, props: NodejsFunctionProps) => {
             const fn = new NodejsFunction(this, id, {
+                runtime: Runtime.NODEJS_20_X,
                 environment: lambdaEnv,
                 ...props
             });
 
             dbInstance.secret?.grantRead(fn);
+            certSecret.grantRead(fn);
+            keySecret.grantRead(fn);
 
             return fn;
         };
 
         const createPatientLambda = createLambda(`create-patient-lambda`, {
-            runtime: Runtime.NODEJS_20_X,
             entry: path.join(lambdaAppDir, 'createPatient.ts'),
             functionName: 'create-patient-lambda',
         });
 
         const getAllPatientRecordsLambda = createLambda(`get-all-patient-records-lambda`, {
-            runtime: Runtime.NODEJS_20_X,
             entry: path.join(lambdaAppDir, 'getAllPatientRecords.ts'),
             functionName: 'get-all-patient-records-lambda',
         });
 
         const getPatientRecordByIdLambda = createLambda(`get-patient-record-lambda`, {
-            runtime: Runtime.NODEJS_20_X,
             entry: path.join(lambdaAppDir, 'getPatientRecordById.ts'),
             functionName: 'get-patient-record-lambda',
         });
 
         const getAllTaxRecordsLambda = createLambda(`get-all-tax-records-lambda`, {
-            runtime: Runtime.NODEJS_20_X,
             entry: path.join(lambdaAppDir, 'getAllTaxRecords.ts'),
             functionName: 'get-all-tax-records-lambda',
         });
 
         const getBankBalanceLambda = createLambda(`get-bank-balance-lambda`, {
-            runtime: Runtime.NODEJS_20_X,
             entry: path.join(lambdaAppDir, 'getBankBalance.ts'),
             functionName: 'get-bank-balance-lambda',
         });
 
         const payIncomeTaxLambda = createLambda(`pay-income-tax-lambda`, {
-            runtime: Runtime.NODEJS_20_X,
             entry: path.join(lambdaAppDir, 'payIncomeTax.ts'),
             functionName: 'pay-income-tax-lambda',
         });
 
         const payVatLambda = createLambda(`pay-vat-lambda`, {
-            runtime: Runtime.NODEJS_20_X,
             entry: path.join(lambdaAppDir, 'payVat.ts'),
             functionName: 'pay-vat-lambda',
         });
 
         const payDividendsLambda = createLambda(`pay-dividends-lambda`, {
-            runtime: Runtime.NODEJS_20_X,
             entry: path.join(lambdaAppDir, 'payDividends.ts'),
             functionName: 'pay-dividends-lambda',
         });
 
         const sellSharesLambda = createLambda(`sell-shares-lambda`, {
-            runtime: Runtime.NODEJS_20_X,
             entry: path.join(lambdaAppDir, 'sellShares.ts'),
             functionName: 'sell-shares-lambda',
         });
 
         const buySharesLambda = createLambda(`buy-shares-lambda`, {
-            runtime: Runtime.NODEJS_20_X,
             entry: path.join(lambdaAppDir, 'buyShares.ts'),
             functionName: 'buy-shares-lambda',
         });
 
         const chargeHealthInsuranceLambda = createLambda(`charge-health-insurance-lambda`, {
-            runtime: Runtime.NODEJS_20_X,
             entry: path.join(lambdaAppDir, 'chargeHealthInsurance.ts'),
             functionName: 'charge-health-insurance-lambda',
         });
+
+        const timeEventCoordinatorLambda = createLambda('time-event-coordinator-lambda', {
+            entry: path.join(lambdaAppDir, 'timeEventCoordinator.ts'),
+            functionName: 'time-event-coordinator-lambda',
+        });
+        
+        const syncTimeLambda = createLambda('sync-time-lambda', {
+            entry: path.join(lambdaAppDir, 'syncTime.ts'),
+            functionName: 'sync-time-lambda',
+        });
+
+        //Event bridge rules
+        const dailyRule = new Rule(this, 'daily-rule', {
+            schedule: Schedule.rate(Duration.minutes(2))
+        });
+        addLambdaPermission(dailyRule, timeEventCoordinatorLambda);
+        dailyRule.addTarget(new LambdaFunction(timeEventCoordinatorLambda));
+
+        const syncTimeRule = new Rule(this, 'sync-time-rule', {
+            schedule: Schedule.rate(Duration.minutes(30))
+        });
+        addLambdaPermission(syncTimeRule, syncTimeLambda);
+        syncTimeRule.addTarget(new LambdaFunction(syncTimeLambda));
 
         // API
         const api = new RestApi(this, `${appName}-api-gateway`, {
@@ -243,13 +309,21 @@ export class BackendStack extends cdk.Stack {
         // Get bank balance
         apiResource.addResource('bank').addResource('balance').addMethod(HttpMethod.GET, new LambdaIntegration(getBankBalanceLambda));
 
-        // QUEUES
 
-        const chargeHealthInsuranceQueue = new Queue(this, 'charge-health-insurance', {
-            queueName: 'charge-health-insurance.fifo',
-            visibilityTimeout: Duration.hours(12),
-        });
-
+        // QUEUE Configs
         chargeHealthInsuranceLambda.addEventSource(new SqsEventSource(chargeHealthInsuranceQueue, {batchSize: 1}));
+        chargeHealthInsuranceQueue.grantSendMessages(createPatientLambda);
+
+        payIncomeTaxLambda.addEventSource(new SqsEventSource(payIncomeTaxQueue, {batchSize: 1}));
+        payIncomeTaxQueue.grantSendMessages(timeEventCoordinatorLambda);
+
+        payVatLambda.addEventSource(new SqsEventSource(payVatQueue, {batchSize: 1}));
+        payVatQueue.grantSendMessages(timeEventCoordinatorLambda);
+
+        buySharesQueue.grantSendMessages(timeEventCoordinatorLambda);
+        buySharesLambda.addEventSource(new SqsEventSource(buySharesQueue, {batchSize: 1}));
+
+        payDividendsQueue.grantSendMessages(timeEventCoordinatorLambda);
+        payDividendsLambda.addEventSource(new SqsEventSource(payDividendsQueue, {batchSize: 1}));
     }
 }
