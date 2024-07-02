@@ -19,7 +19,6 @@ const DrawerTemplate = () => {
     { text: 'Personas', icon: <Category />, route: '/Patients' },
     { text: 'Taxes', icon: <Category />, route: '/Taxes' },
     { text: 'Stocks', icon: <Category />, route: '/Stocks' },
-    /*{ text: 'Logout', icon: <LogoutIcon />, route: '/logout' },*/
   ];
 
   return (
