@@ -12,9 +12,8 @@ const TableTemplate = ({ columns, rows }) => {
     setSearchText(event.target.value);
   };
 
-  const filteredRows = rows.filter((row) =>{
+  const filteredRows = rows.filter((row) =>
     columns.some((column) => row[column.toLowerCase().replace(/ /g, '')].toString().toLowerCase().includes(searchText.toLowerCase()))
-  }
   );
 
   const sortedRows = [...filteredRows].sort((a, b) => {
