@@ -25,7 +25,7 @@ const App = () => {
       <main className="content">
         <Routes>
           <Route path="/Home" element={<Home />} />
-          <Route path="/Patients" element={isAuthenticated ? <Patients /> : <Navigate to="/Home" />} />
+          <Route path="/Patients" element={<Patients />} />
           <Route path="/Taxes" element={<Taxes />} />
           <Route path="/Stocks" element={<Stocks />} />
           <Route path="/" element={<Home />} />
