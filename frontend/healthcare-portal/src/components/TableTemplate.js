@@ -13,8 +13,6 @@ const TableTemplate = ({ columns, rows }) => {
   };
 
   const filteredRows = rows.filter((row) =>{
-    //console.log( row[columns[0].toLowerCase().replace(/ /g, '')])
-    //console.log(row['recordId']);
     columns.some((column) => row[column.toLowerCase().replace(/ /g, '')].toString().toLowerCase().includes(searchText.toLowerCase()))
   }
   );
