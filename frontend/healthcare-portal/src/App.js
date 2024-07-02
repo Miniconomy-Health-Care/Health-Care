@@ -1,29 +1,16 @@
-import React, {useEffect, useState} from 'react';
-import {
-  AppBar,
-  Drawer,
-  IconButton,
-  InputBase,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Toolbar,
-  Typography
-} from '@mui/material';
-import {Link, Navigate, Route, Routes, useLocation} from 'react-router-dom';
-import {Category, Dashboard, Search} from '@mui/icons-material';
-import './App.css';
-
+import React, { useEffect, useState } from 'react';
+import { Routes, Route, Navigate, useLocation} from 'react-router-dom';
 import Cookies from "js-cookie";
-
-import Home from './components/Home';
-import Patients from './components/Patients';
-import Taxes from './components/Taxes';
-import Stocks from './components/Stocks';
+import { Dashboard, Category } from '@mui/icons-material';
+import '../src/pages/Home.css';
+import Home from './pages/Home';
+import Patients from './pages/Patients';
+import Taxes from './pages/Taxes';
+import Stocks from './pages/Stocks';
+import DrawerTemplate from './components/DrawerTemplate';
 
 const App = () => {
-  
+
   const[isAutheticated, setisAutheticated] = useState(false);
   const location = useLocation();
 
@@ -37,71 +24,10 @@ const App = () => {
     setisAutheticated(true);
   }, [location]);
 
-  const drawerItems = [
-    { text: 'Dashboard', icon: <Dashboard />, route: '/Home' },
-    { text: 'Personas', icon: <Category />, route: '/Patients' }, // Link to Patients.js renamed to Personas
-    { text: 'Taxes', icon: <Category />, route: '/Taxes' }, // Link to Taxes.js
-    { text: 'Stocks', icon: <Category />, route: '/Stocks' }, // Link to Stocks.js
-  ];
-
   return (
-    <div>
-      {/* Search Bar */}
-      <AppBar position="fixed" className="appBar">
-        <Toolbar>
-          <Typography variant="h6" className="title">
-            Healthcare Admin Portal
-          </Typography>
-          <div className="search">
-            <div className="searchIcon">
-              <IconButton>
-                <Search />
-              </IconButton>
-            </div>
-            <InputBase
-              placeholder="Search..."
-              classes={{
-                root: 'inputRoot',
-                input: 'inputInput',
-              }}
-              inputProps={{ 'aria-label': 'search' }}
-            />
-          </div>
-        </Toolbar>
-      </AppBar>
-
-      {/* Drawer */}
-      <Drawer
-        variant="permanent"
-        classes={{
-          paper: 'drawerPaper',
-        }}
-      >
-        <div className="toolbar">
-          <Typography variant="h6" className="drawerTitle">
-            
-          </Typography>
-        </div>
-
-        <div>
-          <button onClick={logout}>Logout</button>
-        </div>
-        
-        <List>
-          {drawerItems.map((item, index) => (
-            <ListItem button key={item.text} component={Link} to={item.route}>
-              <ListItemIcon style={{ color: '#fff' }}>
-                {item.icon}
-              </ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItem>
-          ))}
-        </List>
-      </Drawer>
-
-      {/* Main Content */}
+    <div className="root">
+      <DrawerTemplate />
       <main className="content">
-        <div className="toolbar" />
         <Routes>
           <Route path="/" element={<Navigate to="/Home" replace/>}/>
           <Route path="/Home" element={<Home />} />
