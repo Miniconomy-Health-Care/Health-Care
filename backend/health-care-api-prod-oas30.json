@@ -2,15 +2,10 @@
   "openapi" : "3.0.1",
   "info" : {
     "title" : "health-care-api",
-    "version" : "1"
+    "version" : "2024-07-02T12:59:18Z"
   },
   "servers" : [ {
-    "url" : "https://iz5h4rni56.execute-api.eu-west-1.amazonaws.com/{basePath}",
-    "variables" : {
-      "basePath" : {
-        "default" : "prod"
-      }
-    }
+    "url" : "https://api.care.projects.bbdgrad.com"
   } ],
   "paths" : {
     "/api/patient" : {
@@ -19,7 +14,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/CreatePatientModel"
+                "$ref" : "#/components/schemas/HealthcreatMahmpnqCwIAs"
               }
             }
           },
@@ -48,12 +43,15 @@
           }
         }
       }
+    },
+    "/api/simulation" : {
+      "post" : { }
     }
   },
   "components" : {
     "schemas" : {
       "Empty" : {
-        "title" : "Create Patient Success Schema",
+        "title" : "Empty Schema",
         "type" : "object"
       },
       "Error" : {
@@ -65,7 +63,7 @@
           }
         }
       },
-      "CreatePatientModel" : {
+      "HealthcreatMahmpnqCwIAs" : {
         "required" : [ "personaId" ],
         "type" : "object",
         "properties" : {
