@@ -10,7 +10,11 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
         });
 
         if (response.statusCode !== 200) {
-            throw new Error('Failed to request commercial bank');
+            console.error('Failed to request commercial bank:', response.body);
+            return {
+                statusCode: response.statusCode as number,
+                body: JSON.stringify(response.body)
+            };
         }
 
         console.log('Successfully retrieved account balance');
