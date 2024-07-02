@@ -3,7 +3,8 @@ import {aws_cognito, aws_ec2 as ec2, aws_iam as iam, aws_rds as rds, Duration} f
 import {Construct} from 'constructs';
 import {GitHubStackProps} from './githubStackProps';
 import {
-    AuthorizationType, CognitoUserPoolsAuthorizer,
+    AuthorizationType,
+    CognitoUserPoolsAuthorizer,
     JsonSchemaType,
     LambdaIntegration,
     Model,
@@ -181,6 +182,7 @@ export class BackendStack extends cdk.Stack {
                 runtime: Runtime.NODEJS_20_X,
                 environment: lambdaEnv,
                 bundling: {nodeModules: ['pg']},
+                timeout: Duration.seconds(30),
                 ...props
             });
 
@@ -254,6 +256,11 @@ export class BackendStack extends cdk.Stack {
         const syncTimeLambda = createLambda('sync-time-lambda', {
             entry: path.join(lambdaAppDir, 'syncTime.ts'),
             functionName: 'sync-time-lambda',
+        });
+
+        const simulationEventsLambda = createLambda('simulation-events-lambda', {
+            entry: path.join(lambdaAppDir, 'simulationEvents.ts'),
+            functionName: 'simulation-events-lambda',
         });
 
         //Event bridge rules
@@ -339,6 +346,9 @@ export class BackendStack extends cdk.Stack {
             ],
         });
 
+        // sim time endpoint
+        const simulationResource = apiResource.addResource('simulation').addMethod(HttpMethod.POST, new LambdaIntegration(simulationEventsLambda));
+
         // Get all patient records endpoint
         privatePatientRecordResource.addMethod(HttpMethod.GET, new LambdaIntegration(getAllPatientRecordsLambda));
 
@@ -350,7 +360,6 @@ export class BackendStack extends cdk.Stack {
 
         // Get bank balance
         privateApiResource.addResource('bank').addResource('balance').addMethod(HttpMethod.GET, new LambdaIntegration(getBankBalanceLambda));
-
 
         // QUEUE Configs
         chargeHealthInsuranceLambda.addEventSource(new SqsEventSource(chargeHealthInsuranceQueue, {batchSize: 1}));
