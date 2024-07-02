@@ -1,7 +1,5 @@
-import pkg from 'pg';
+import {Pool, PoolConfig} from 'pg';
 import {GetSecretValueCommand, SecretsManagerClient} from '@aws-sdk/client-secrets-manager';
-
-const {Pool, Client} = pkg;
 
 const secretManagerClient = new SecretsManagerClient();
 export const getSqlPool = async () => {
@@ -24,7 +22,7 @@ export const getSqlPool = async () => {
         dbname: DB_NAME
     } = JSON.parse(secretData);
 
-    const config = {
+    const config: PoolConfig = {
         user: DB_USER,
         host: DB_HOST,
         database: DB_NAME,
