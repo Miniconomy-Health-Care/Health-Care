@@ -7,8 +7,8 @@ const Patients = () => {
   const columns = ['Record ID', 'Personal ID', 'Date', 'Treatment Name', 'Problem', 'Cost'];
 
   const patients = [
-    { recordId: 1, personalId: 1, date: '2023-06-01', treatmentName: 'Surgery', problem: 'Appendicitis', cost: 5000 },
-    { recordId: 2, personalId: 2, date: '2023-06-10', treatmentName: 'Physical Therapy', problem: 'Back Pain', cost: 300 },
+    { recordid: 1, personalid: 1, date: '2023-06-01', treatmentname: 'Surgery', problem: 'Appendicitis', cost: 5000 },
+    { recordid: 2, personalid: 2, date: '2023-06-10', treatmentname: 'Physical Therapy', problem: 'Back Pain', cost: 300 },
     // Add more patient records as needed
   ];
 

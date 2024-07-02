@@ -7,9 +7,9 @@ const Stocks = () => {
   const columns = ['Stock ID', 'Stock Type', 'Date'];
 
   const stocks = [
-    { stockId: 1, stockType: 'Bought', date: '2023-07-01' },
-    { stockId: 2, stockType: 'Sold', date: '2023-08-15' },
-    { stockId: 3, stockType: 'Bought', date: '2023-09-20' },
+    { stockid: 1, stocktype: 'Bought', date: '2023-07-01' },
+    { stockid: 2, stocktype: 'Sold', date: '2023-08-15' },
+    { stockid: 3, stocktype: 'Bought', date: '2023-09-20' },
     // Add more stock records as needed
   ];
 
