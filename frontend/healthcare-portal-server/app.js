@@ -91,14 +91,14 @@ const getToken = async (code) => {
 
   const responseData = await response.json();
 
-  return responseData.access_token;
+  return responseData.id_token;
 }
 
 const verifyToken = async (token) => {
 
   const verifier = CognitoJwtVerifier.create({
     userPoolId: userPoolId,
-    tokenUse: "access",
+    tokenUse: "id",
     clientId: clientId,
   });
 

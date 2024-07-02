@@ -1,8 +1,16 @@
 import * as cdk from 'aws-cdk-lib';
-import {aws_ec2 as ec2, aws_iam as iam, aws_rds as rds, Duration} from 'aws-cdk-lib';
+import {aws_cognito, aws_ec2 as ec2, aws_iam as iam, aws_rds as rds, Duration} from 'aws-cdk-lib';
 import {Construct} from 'constructs';
 import {GitHubStackProps} from './githubStackProps';
-import {JsonSchemaType, LambdaIntegration, Model, RequestValidator, RestApi} from 'aws-cdk-lib/aws-apigateway';
+import {
+    AuthorizationType, CognitoUserPoolsAuthorizer,
+    JsonSchemaType,
+    LambdaIntegration,
+    Model,
+    RequestValidator,
+    RestApi,
+    SecurityPolicy
+} from 'aws-cdk-lib/aws-apigateway';
 import {Runtime} from 'aws-cdk-lib/aws-lambda';
 import {HttpMethod} from 'aws-cdk-lib/aws-apigatewayv2';
 import {Effect, PolicyDocument, PolicyStatement} from 'aws-cdk-lib/aws-iam';
@@ -11,6 +19,8 @@ import * as path from 'path';
 import {SqsEventSource} from 'aws-cdk-lib/aws-lambda-event-sources';
 import {Queue} from 'aws-cdk-lib/aws-sqs';
 import {Secret} from 'aws-cdk-lib/aws-secretsmanager';
+import {Bucket} from 'aws-cdk-lib/aws-s3';
+import {Certificate} from 'aws-cdk-lib/aws-certificatemanager';
 import {Rule, Schedule} from 'aws-cdk-lib/aws-events';
 import {addLambdaPermission, LambdaFunction} from 'aws-cdk-lib/aws-events-targets';
 
@@ -170,6 +180,7 @@ export class BackendStack extends cdk.Stack {
             const fn = new NodejsFunction(this, id, {
                 runtime: Runtime.NODEJS_20_X,
                 environment: lambdaEnv,
+                bundling: {nodeModules: ['pg']},
                 ...props
             });
 
@@ -259,15 +270,46 @@ export class BackendStack extends cdk.Stack {
         syncTimeRule.addTarget(new LambdaFunction(syncTimeLambda));
 
         // API
+        const domainName = 'api.care.projects.bbdgrad.com';
+
         const api = new RestApi(this, `${appName}-api-gateway`, {
             deployOptions: {stageName: 'prod', tracingEnabled: true},
             restApiName: `${appName}-api`,
-            defaultMethodOptions: {},
+            domainName: {
+                domainName: domainName,
+                certificate: Certificate.fromCertificateArn(this, 'api-cert', 'arn:aws:acm:eu-west-1:363615071302:certificate/8c0eecf5-8298-4521-990a-9fc3c9d54dd7'),
+                mtls: {
+                    bucket: Bucket.fromBucketName(this, 'truststore-bucket', 'miniconomy-trust-store-bucket'),
+                    key: 'truststore.pem'
+                },
+                securityPolicy: SecurityPolicy.TLS_1_2
+            }
         });
 
+        const cognitoUserPool = aws_cognito.UserPool.fromUserPoolId(this, 'cognito-user-pool', 'eu-west-1_aWn2igcWJ');
+
+        const privateApi = new RestApi(this, `${appName}-private-api-gateway`, {
+            deployOptions: {stageName: 'prod'},
+            restApiName: `${appName}-private-api`,
+            defaultMethodOptions: {
+                authorizationType: AuthorizationType.COGNITO,
+                authorizer: new CognitoUserPoolsAuthorizer(this, 'cognito-api-authorizer', {
+                    authorizerName: 'cognito-api-authorizer',
+                    cognitoUserPools: [cognitoUserPool],
+                    resultsCacheTtl: Duration.minutes(30)
+                })
+            }
+        });
+        
+        // Public api resources
         const apiResource = api.root.addResource('api');
         const patientResource = apiResource.addResource('patient');
-        const patientRecordResource = patientResource.addResource('record');
+        
+        // Private api resources
+        const privateApiResource = privateApi.root.addResource('api');
+        const privatePatientResource = privateApiResource.addResource('patient');
+        const privatePatientRecordResource = privatePatientResource.addResource('record');
+        
         // Create patient endpoint
         const createPatientRequestModel = new Model(this, 'create-patient-request-model', {
             restApi: api,
@@ -298,16 +340,16 @@ export class BackendStack extends cdk.Stack {
         });
 
         // Get all patient records endpoint
-        patientRecordResource.addMethod(HttpMethod.GET, new LambdaIntegration(getAllPatientRecordsLambda));
+        privatePatientRecordResource.addMethod(HttpMethod.GET, new LambdaIntegration(getAllPatientRecordsLambda));
 
         // Get patient record by id
-        patientRecordResource.addResource('{personaId}').addMethod(HttpMethod.GET, new LambdaIntegration(getPatientRecordByIdLambda));
+        privatePatientRecordResource.addResource('{personaId}').addMethod(HttpMethod.GET, new LambdaIntegration(getPatientRecordByIdLambda));
 
         // Get all tax records
-        apiResource.addResource('tax').addResource('record').addMethod(HttpMethod.GET, new LambdaIntegration(getAllTaxRecordsLambda));
+        privateApiResource.addResource('tax').addResource('record').addMethod(HttpMethod.GET, new LambdaIntegration(getAllTaxRecordsLambda));
 
         // Get bank balance
-        apiResource.addResource('bank').addResource('balance').addMethod(HttpMethod.GET, new LambdaIntegration(getBankBalanceLambda));
+        privateApiResource.addResource('bank').addResource('balance').addMethod(HttpMethod.GET, new LambdaIntegration(getBankBalanceLambda));
 
 
         // QUEUE Configs
