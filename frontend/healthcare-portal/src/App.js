@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useLocation} from 'react-router-dom';
-import Cookies from "js-cookie";
-import { Dashboard, Category } from '@mui/icons-material';
 import '../src/pages/Home.css';
 import Home from './pages/Home';
 import Patients from './pages/Patients';
@@ -13,12 +11,6 @@ const App = () => {
 
   const[isAutheticated, setisAutheticated] = useState(false);
   const location = useLocation();
-
-  function logout(){
-    Cookies.remove('jwt');
-    setisAutheticated(false);
-    window.location.reload()
-  }
 
   useEffect(() => {
     setisAutheticated(true);
