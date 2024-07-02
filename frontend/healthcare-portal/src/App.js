@@ -14,11 +14,11 @@ const App = () => {
   const[isAutheticated, setisAutheticated] = useState(false);
   const location = useLocation();
 
-  function logout(){
+  /*function logout(){
     Cookies.remove('jwt');
     setisAutheticated(false);
     window.location.reload()
-  }
+  }*/
 
   useEffect(() => {
     setisAutheticated(true);
