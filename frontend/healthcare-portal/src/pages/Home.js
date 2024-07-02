@@ -69,7 +69,7 @@ const Home = () => {
             {/* Pie Chart and Bar Chart */}
             <Grid item xs={12} md={6}>
               <Paper className="pieChartPaper">
-              <Typography variant="h5" className="chartTitle">Total Treatments</Typography>
+                <Typography variant="h5" className="chartTitle">Total Treatments</Typography>
                 <PieChartComponent data={pieChartData} colors={pieChartColors} />
               </Paper>
             </Grid>
