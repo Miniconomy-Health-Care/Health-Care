@@ -62,9 +62,7 @@ const Home = () => {
   },[])
 
   return (
-    <div className="root">
-      <main className="content">
-        <Container maxWidth="lg">
+        <Box marginLeft="7rem" padding = "1.75rem">
           <Grid container spacing={3}>
             {/* Cards */}
             {styleArray.map((style, index) => (
@@ -91,9 +89,7 @@ const Home = () => {
               </Paper>
             </Grid>
           </Grid>
-        </Container>
-      </main>
-    </div>
+        </Box>
   );
 };
 
