@@ -3,7 +3,7 @@ import {sendQueueMessage} from '../utils/queueUtils';
 import assert from 'node:assert';
 import {httpsFetch} from '../utils/fetchUtils';
 
-const handler: SQSHandler = async (event) => {
+export const handler: SQSHandler = async (event) => {
     const body = JSON.parse(event.Records[0].body);
     const queueUrl = process.env.DISCHARGE_PATIENT_QUEUE_URL;
     assert(queueUrl, 'DISCHARGE_PATIENT_QUEUE_URL not set');

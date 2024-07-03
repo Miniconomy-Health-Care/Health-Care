@@ -1,5 +1,6 @@
 import {type APIGatewayProxyHandler} from 'aws-lambda';
-import { getSqlPool } from '../utils/dbUtils';
+import {getSqlPool} from '../utils/dbUtils';
+import {Cors} from 'aws-cdk-lib/aws-apigateway';
 
 export const handler: APIGatewayProxyHandler = async (event, context) => {
 
@@ -12,6 +13,10 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
             body: JSON.stringify({ message: 'Missing patient ID' }),
             headers: {
                 'Content-Type': 'application/json',
+                'Access-Control-Allow-Headers': Cors.DEFAULT_HEADERS.join(','),
+                'Access-Control-Allow-Origin': Cors.ALL_ORIGINS.join(','),
+                'Access-Control-Allow-Methods': Cors.ALL_METHODS.join(','),
+                'Vary': 'Origin'
             },
         };
     }
@@ -27,6 +32,10 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
                 body: JSON.stringify({ message: 'No records found for the given patient ID' }),
                 headers: {
                     'Content-Type': 'application/json',
+                    'Access-Control-Allow-Headers': Cors.DEFAULT_HEADERS.join(','),
+                    'Access-Control-Allow-Origin': Cors.ALL_ORIGINS.join(','),
+                    'Access-Control-Allow-Methods': Cors.ALL_METHODS.join(','),
+                    'Vary': 'Origin'
                 },
             };
         }
@@ -36,6 +45,10 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
             body: JSON.stringify(records),
             headers: {
                 'Content-Type': 'application/json',
+                'Access-Control-Allow-Headers': Cors.DEFAULT_HEADERS.join(','),
+                'Access-Control-Allow-Origin': Cors.ALL_ORIGINS.join(','),
+                'Access-Control-Allow-Methods': Cors.ALL_METHODS.join(','),
+                'Vary': 'Origin'
             },
         };
     } catch (error) {
@@ -46,6 +59,10 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
             body: JSON.stringify({ message: 'Error fetching records', error }),
             headers: {
                 'Content-Type': 'application/json',
+                'Access-Control-Allow-Headers': Cors.DEFAULT_HEADERS.join(','),
+                'Access-Control-Allow-Origin': Cors.ALL_ORIGINS.join(','),
+                'Access-Control-Allow-Methods': Cors.ALL_METHODS.join(','),
+                'Vary': 'Origin'
             },
         };
     } finally {
