@@ -181,6 +181,36 @@ export class BackendStack extends cdk.Stack {
             contentBasedDeduplication: true,
         });
 
+        const sellSharesQueue = new Queue(this, 'sell-shares', {
+            queueName: 'sell-shares.fifo',
+            visibilityTimeout: Duration.minutes(5),
+            contentBasedDeduplication: true,
+        });
+
+        const registerOnStockMarketQueue = new Queue(this, 'register-on-stockmarket', {
+            queueName: 'register-on-stockmarket.fifo',
+            visibilityTimeout: Duration.minutes(5),
+            contentBasedDeduplication: true,
+        });
+
+        const payUserDividendsQueue = new Queue(this, 'pay-user-dividends', {
+            queueName: 'pay-user-dividends.fifo',
+            visibilityTimeout: Duration.minutes(5),
+            contentBasedDeduplication: true,
+        });
+
+        const payBusinessDividendsQueue = new Queue(this, 'pay-business-dividends', {
+            queueName: 'pay-business-dividends.fifo',
+            visibilityTimeout: Duration.minutes(5),
+            contentBasedDeduplication: true,
+        });
+
+        const buyBusinessSharesQueue = new Queue(this, 'buy-business-shares', {
+            queueName: 'buy-business-shares.fifo',
+            visibilityTimeout: Duration.minutes(5),
+            contentBasedDeduplication: true,
+        });
+
         const dischargePatientQueue = new Queue(this, 'discharge-patient', {
             queueName: 'discharge-patient.fifo',
             visibilityTimeout: Duration.minutes(5),
@@ -206,6 +236,11 @@ export class BackendStack extends cdk.Stack {
             'GET_TAX_NUMBER_QUEUE_URL': getTaxNumberQueue.queueUrl,
             'PAY_REV_SERVICE_QUEUE_URL': payRevServiceQueue.queueUrl,
             'SUB_NOTICE_OF_PAYMENT_TO_REV_QUEUE_URL': subNoticeOfPaymentToRevQueue.queueUrl,
+            'SELL_SHARES_QUEUE_URL': sellSharesQueue.queueUrl,
+            'REGISTER_ON_STOCKMARKET_QUEUE_URL': registerOnStockMarketQueue.queueUrl,
+            'PAY_USER_DIVIDENDS_QUEUE_URL': payUserDividendsQueue.queueUrl,
+            'PAY_BUSINESS_DIVIDENDS_QUEUE_URL': payBusinessDividendsQueue.queueUrl,
+            'BUY_BUSINESS_SHARES_QUEUE_URL': buyBusinessSharesQueue.queueUrl,
             'DISCHARGE_PATIENT_QUEUE_URL': dischargePatientQueue.queueUrl,
             'CHECK_PATIENT_DIED_QUEUE_URL': checkPatientDiedQueue.queueUrl
         };
@@ -317,6 +352,26 @@ export class BackendStack extends cdk.Stack {
         const subNoticeOfPaymentToRevLambda = createLambda('sub-notice-payment-rev-lambda', {
             entry: path.join(lambdaAppDir, 'subNoticeOfPaymentToRev.ts'),
             functionName: 'sub-notice-payment-rev-lambda',
+        });
+
+        const registerOnStockMarketLambda = createLambda('register-on-stockmarket-lambda', {
+            entry: path.join(lambdaAppDir, 'registerOnStockMarket.ts'),
+            functionName: 'register-on-stockmarket-lambda',
+        });
+
+        const payBusinessDividendsLambda = createLambda('pay-business-dividends-lambda', {
+            entry: path.join(lambdaAppDir, 'payBusinessDividends.ts'),
+            functionName: 'pay-business-dividends-lambda',
+        });
+
+        const payUserDividendsLambda = createLambda('pay-user-dividends-lambda', {
+            entry: path.join(lambdaAppDir, 'payUserDividends.ts'),
+            functionName: 'pay-user-dividends-lambda',
+        });
+
+        const buyBusinessSharesLambda = createLambda('buy-business-shares-lambda', {
+            entry: path.join(lambdaAppDir, 'buyBusinessShares.ts'),
+            functionName: 'buy-business-shares-lambda',
         });
 
         const dischargePatientLambda = createLambda('discharge-patient-lambda', {
@@ -455,6 +510,21 @@ export class BackendStack extends cdk.Stack {
 
         subNoticeOfPaymentToRevQueue.grantSendMessages(payRevServiceLamda);
         subNoticeOfPaymentToRevLambda.addEventSource(new SqsEventSource(subNoticeOfPaymentToRevQueue, {batchSize: 1}));
+
+        sellSharesQueue.grantSendMessages(registerOnStockMarketLambda);
+        sellSharesLambda.addEventSource(new SqsEventSource(sellSharesQueue, {batchSize: 1}));
+
+        registerOnStockMarketQueue.grantSendMessages(simulationEventsLambda);
+        registerOnStockMarketLambda.addEventSource(new SqsEventSource(registerOnStockMarketQueue, {batchSize: 1}));
+
+        payUserDividendsQueue.grantSendMessages(payDividendsLambda);
+        payUserDividendsLambda.addEventSource(new SqsEventSource(payUserDividendsQueue, {batchSize: 1}));
+
+        payBusinessDividendsQueue.grantSendMessages(payDividendsLambda);
+        payBusinessDividendsLambda.addEventSource(new SqsEventSource(payBusinessDividendsQueue, {batchSize: 1}));
+
+        buyBusinessSharesQueue.grantSendMessages(buySharesLambda);
+        buyBusinessSharesLambda.addEventSource(new SqsEventSource(buyBusinessSharesQueue, {batchSize: 1}));
 
         dischargePatientQueue.grantSendMessages(checkIfPatientDiedLambda);
         dischargePatientLambda.addEventSource(new SqsEventSource(dischargePatientQueue, {batchSize: 1}));

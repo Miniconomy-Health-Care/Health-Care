@@ -3,7 +3,6 @@ import { getSqlPool } from '../utils/dbUtils';
 
 export const handler: APIGatewayProxyHandler = async (event, context) => {
 
-
     const pool = await getSqlPool();
     const patientId = event.pathParameters?.personaId;
 

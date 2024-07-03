@@ -1,6 +1,5 @@
 import {SQSHandler} from 'aws-lambda';
 import {getSqlPool} from '../utils/dbUtils';
-import {getCurrentDate} from '../utils/timeUtils';
 import {httpsFetch} from '../utils/fetchUtils';
 import {sendQueueMessage} from '../utils/queueUtils';
 import assert from 'node:assert';
