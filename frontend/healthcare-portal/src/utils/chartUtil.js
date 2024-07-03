@@ -15,7 +15,7 @@ const BarchartReport = ({ data }) => {
           {
             data.map((entry, index) => (
               <text key={`label-${index}`} fill="#000" fontSize={12} x={entry.month} y={entry.transactions + 10}>
-                {entry.transactions} USD
+                {entry.transactions} Ð
               </text>
             ))
           }
@@ -36,11 +36,15 @@ export const getBarChartData = (json) => {
   };
 
   data.forEach(item => {
-    const date = new Date(item.date);
-    const month = date.toLocaleString('default', { month: 'short' });
+    const [year, month, day] = item.date.split('|');
+    const fullYear = `20${year}`; // Convert YY to YYYY
+    const formattedDate = `${fullYear}-${month}-${day}`;
+    
+    const date = new Date(formattedDate);
+    const monthName = date.toLocaleString('default', { month: 'short' });
 
     if (item.status === "completed") {
-      monthlyTransactions[month] += 1;
+      monthlyTransactions[monthName] += 1;
     }
   });
 

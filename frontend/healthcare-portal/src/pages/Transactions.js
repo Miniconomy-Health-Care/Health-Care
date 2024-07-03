@@ -4,7 +4,7 @@ import TableTemplate from '../components/TableTemplate';
 import { getBankTransactions } from '../api/api';
 
 const Transactions = () => {
-  const columns = ['Transaction ID', 'Sender', 'Recipient', 'Reference', 'Amount', 'Date', 'Status'];
+  const columns = ['Transaction ID', 'Sender', 'Recipient', 'Reference', 'Amount in ₥', 'Date', 'Status'];
   const [transactions, setTransactions] = useState([]);
 
   useEffect(() => {
@@ -20,8 +20,8 @@ const Transactions = () => {
             "debitAccountName": "health_insurance",
             "creditAccountName": "health_care",
             "reference": "7",
-            "amount": 100.50,
-            "date": "2024-06-15",
+            "amount": 1024,
+            "date": "24|06|15",
             "status": "completed"
           },
           {
@@ -29,8 +29,8 @@ const Transactions = () => {
             "debitAccountName": "health_insurance",
             "creditAccountName": "health_care",
             "reference": "1",
-            "amount": 200.00,
-            "date": "2024-06-16",
+            "amount": 2024,
+            "date": "24|06|16",
             "status": "pending"
           },
           {
@@ -39,7 +39,7 @@ const Transactions = () => {
             "creditAccountName": "central_revenue",
             "reference": "VAT",
             "amount": 5120,
-            "date": "2024-06-17",
+            "date": "24|06|17",
             "status": "failed"
           },
           {
@@ -48,7 +48,7 @@ const Transactions = () => {
             "creditAccountName": "health_care",
             "reference": "dividends",
             "amount": 2048,
-            "date": "2024-06-18",
+            "date": "24|06|18",
             "status": "completed"
           },
           {
@@ -57,7 +57,7 @@ const Transactions = () => {
             "creditAccountName": "central_revenue",
             "reference": "Income Tax",
             "amount": 9216,
-            "date": "2024-06-19",
+            "date": "24|06|19",
             "status": "completed"
           }
         ]

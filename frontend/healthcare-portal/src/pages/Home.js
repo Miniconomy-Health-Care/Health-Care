@@ -6,11 +6,11 @@ import { getBarChartData, getPieChartData } from '../utils/chartUtil'
 import './Home.css';
 
 const samplePieJson = `[
-  {"personaid":"3","isadmitted":true,"recordid":1,"date":"01|02|03","treatmentname":"Doctor Visit","problem":"Sickness","treatmentcost":409600},
-  {"personaid":"3","isadmitted":true,"recordid":2,"date":"01|02|03","treatmentname":"Medication","problem":"Prescription","treatmentcost":2044800},
-  {"personaid":"3","isadmitted":true,"recordid":3,"date":"01|02|03","treatmentname":"Medication","problem":"Prescription","treatmentcost":2044800},
+  {"personaid":"6","isadmitted":true,"recordid":1,"date":"01|02|03","treatmentname":"Doctor Visit","problem":"Sickness","treatmentcost":409600},
+  {"personaid":"8","isadmitted":true,"recordid":2,"date":"01|02|03","treatmentname":"Medication","problem":"Prescription","treatmentcost":2044800},
+  {"personaid":"5","isadmitted":true,"recordid":3,"date":"01|02|03","treatmentname":"Medication","problem":"Prescription","treatmentcost":2044800},
   {"personaid":"3","isadmitted":true,"recordid":3,"date":"01|02|03","treatmentname":"Surgery","problem":"Prescription","treatmentcost":2044800},
-  {"personaid":"3","isadmitted":true,"recordid":3,"date":"01|02|03","treatmentname":"Surgery","problem":"Prescription","treatmentcost":2044800}
+  {"personaid":"1","isadmitted":true,"recordid":3,"date":"01|02|03","treatmentname":"Surgery","problem":"Prescription","treatmentcost":2044800}
 ]`;
 
 const pieChartColors = ['#3498DB', '#E67E22', '#2ECC71'];
@@ -27,17 +27,8 @@ const sampleJson = `{
         "debitAccountName": "health_insurance",
         "creditAccountName": "health_care",
         "reference": "7",
-        "amount": 100.50,
-        "date": "2024-06-15",
-        "status": "completed"
-      },
-      {
-        "id": "4bb85f64-6717-4562-b3fc-3d963f77bfa9",
-        "debitAccountName": "health_insurance",
-        "creditAccountName": "health_care",
-        "reference": "1",
-        "amount": 2000.00,
-        "date": "2024-05-16",
+        "amount": 1024,
+        "date": "24|06|15",
         "status": "completed"
       },
       {
@@ -45,8 +36,8 @@ const sampleJson = `{
         "debitAccountName": "health_insurance",
         "creditAccountName": "health_care",
         "reference": "1",
-        "amount": 200.00,
-        "date": "2024-06-16",
+        "amount": 2024,
+        "date": "24|06|16",
         "status": "pending"
       },
       {
@@ -55,7 +46,7 @@ const sampleJson = `{
         "creditAccountName": "central_revenue",
         "reference": "VAT",
         "amount": 5120,
-        "date": "2024-06-17",
+        "date": "24|06|17",
         "status": "failed"
       },
       {
@@ -64,7 +55,7 @@ const sampleJson = `{
         "creditAccountName": "health_care",
         "reference": "dividends",
         "amount": 2048,
-        "date": "2024-06-18",
+        "date": "24|05|18",
         "status": "completed"
       },
       {
@@ -73,7 +64,7 @@ const sampleJson = `{
         "creditAccountName": "central_revenue",
         "reference": "Income Tax",
         "amount": 9216,
-        "date": "2024-06-19",
+        "date": "24|06|19",
         "status": "completed"
       }
     ]
