@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, TableSortLabel } from '@mui/material';
 
 const TableTemplate = ({ columns, rows }) => {
@@ -35,6 +35,10 @@ const TableTemplate = ({ columns, rows }) => {
 
     setSortedRows(sorted);
   };
+
+  useEffect(() => {
+    setSortedRows(rows);
+  }, [rows]);
 
   return (
     <TableContainer>
