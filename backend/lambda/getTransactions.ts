@@ -17,7 +17,7 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
             };
         }
 
-        console.log('Successfully retrieved account balance');
+        console.log('Successfully retrieved transaction history');
         return {
             statusCode: 200,
             body: JSON.stringify(response.body)
