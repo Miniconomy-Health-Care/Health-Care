@@ -6,7 +6,7 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
         const response = await httpsFetch({
             method: 'GET',
             host: 'api.commercialbank.projects.bbdgrad.com',
-            path: '/account/balance'
+            path: '/transactions'
         });
 
         if (response.statusCode !== 200) {
