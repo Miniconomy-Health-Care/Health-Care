@@ -5,5 +5,5 @@ const token = Cookies.get('jwt');
 
 
 export function getPersonaRecords() {
-return fetch(`${baseUrl}/patient/record`, {method: 'GET', headers: {'Content-Type': 'application/json', 'Authorization':token }})
+return fetch(`${baseUrl}/patient/record`, {method: 'GET', headers: {'Content-Type': 'application/json', 'Authorization':token, 'Access-Control-Allow-Origin':'*' }})
 }
