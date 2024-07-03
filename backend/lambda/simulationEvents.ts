@@ -10,6 +10,7 @@ const Actions = {
 } as const;
 
 export const handler: APIGatewayProxyHandler = async (event) => {
+    console.log(event);
     const body = JSON.parse(event.body!);
     const action = body.action;
     if (action === Actions.start) {
