@@ -255,6 +255,13 @@ export class BackendStack extends cdk.Stack {
             entry: path.join(lambdaAppDir, 'syncTime.ts'),
             functionName: 'sync-time-lambda',
         });
+        
+        const getTransactions = createLambda('get-transactions-lambda', {
+            entry: path.join(lambdaAppDir, 'getTransactions.ts'),
+            functionName: 'get-transactions-lambda',
+        });
+        
+        
 
         //Event bridge rules
         const dailyRule = new Rule(this, 'daily-rule', {
@@ -349,8 +356,10 @@ export class BackendStack extends cdk.Stack {
         privateApiResource.addResource('tax').addResource('record').addMethod(HttpMethod.GET, new LambdaIntegration(getAllTaxRecordsLambda));
 
         // Get bank balance
-        privateApiResource.addResource('bank').addResource('balance').addMethod(HttpMethod.GET, new LambdaIntegration(getBankBalanceLambda));
-
+        const privateBankResource = privateApiResource.addResource('bank');
+        privateBankResource.addResource('balance').addMethod(HttpMethod.GET, new LambdaIntegration(getBankBalanceLambda));
+        privateBankResource.addResource('transactions').addMethod(HttpMethod.GET, new LambdaIntegration(getTransactions));
+        
 
         // QUEUE Configs
         chargeHealthInsuranceLambda.addEventSource(new SqsEventSource(chargeHealthInsuranceQueue, {batchSize: 1}));
