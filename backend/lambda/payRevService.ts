@@ -32,7 +32,7 @@ export const handler: SQSHandler = async (sqsEvent) => {
     }, requestBody);
 
     if (response.statusCode !== 200) {
-        throw new Error('Failed to request tax number');
+        throw new Error('Failed to pay revenue service');
     }
 
     //store tax record after payment
