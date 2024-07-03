@@ -1,4 +1,3 @@
-// Taxes.js
 import React from 'react';
 import { Container, Paper, Typography } from '@mui/material';
 import TableTemplate from '../components/TableTemplate';
