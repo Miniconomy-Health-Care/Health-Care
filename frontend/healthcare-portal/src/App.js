@@ -4,8 +4,9 @@ import { CssBaseline } from '@mui/material';
 import Home from './pages/Home';
 import Patients from './pages/Patients';
 import Taxes from './pages/Taxes';
-import Stocks from './pages/Stocks';
+import Transactions from './pages/Transactions';
 import DrawerTemplate from './components/DrawerTemplate';
+import {  Box  } from '@mui/material';
 import './pages/Home.css';
 
 const App = () => {
@@ -19,6 +20,7 @@ const App = () => {
   return (
     <div className="root">
       <CssBaseline />
+      <Box display = "flex" >
       <DrawerTemplate />
       <main className="content">
         <Routes>
@@ -26,10 +28,11 @@ const App = () => {
           <Route path="/Home" element={<Home />} />
           <Route path="/Patients" element={isAuthenticated ? <Patients /> : <Navigate to="/Home" />} />
           <Route path="/Taxes" element={isAuthenticated ? <Taxes /> : <Navigate to="/Home" />} />
-          <Route path="/Stocks" element={isAuthenticated ? <Stocks /> : <Navigate to="/Home" />} />
+          <Route path="/Transactions" element={isAuthenticated ? <Transactions /> : <Navigate to="/Home" />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
+      </Box>
     </div>
   );
 };

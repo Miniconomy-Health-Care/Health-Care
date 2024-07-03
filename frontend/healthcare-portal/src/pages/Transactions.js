@@ -2,8 +2,8 @@ import React from 'react';
 import { Container, Paper, Typography } from '@mui/material';
 import TableTemplate from '../components/TableTemplate';
 
-const Stocks = () => {
-  const columns = ['Stock ID', 'Stock Type', 'Date'];
+const Transactions = () => {
+  const columns = ['ID','Debit Account Name','Credit Account Name','Reference','Amount','Date','Status'];
 
   const stocks = [
     { stockid: 1, stocktype: 'Bought', date: '2023-07-01' },
@@ -15,11 +15,11 @@ const Stocks = () => {
   return (
     <Container>
       <Paper className="tablePaper">
-        <Typography variant="h4" align="center" className="tableHeading">Stocks Table</Typography>
+        <Typography variant="h4" align="center" className="tableHeading">Transactions Table</Typography>
         <TableTemplate columns={columns} rows={stocks} />
       </Paper>
     </Container>
   );
 };
 
-export default Stocks;
+export default Transactions;

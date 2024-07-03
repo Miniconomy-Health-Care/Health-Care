@@ -1,25 +1,51 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Container, Paper, Typography } from '@mui/material';
 import TableTemplate from '../components/TableTemplate';
 import { getPersonaRecords } from '../api/api';
 
 const Patients = () => {
- const columns = ['Persona ID', 'Persona Status', 'Record ID', 'Date', 'Treatment Type', 'Problem', 'Cost'];
+  const columns = ['Persona ID', 'Persona Status', 'Record ID', 'Date', 'Treatment Type', 'Problem', 'Cost'];
+  const [patients, setPatients] = useState([]);
 
-const patients = [
-  { recordid: 1, personalid: 1, PersonaStatus: 'Admitted', date: '2023-06-01', TreatmentType: 'Surgery', problem: 'Appendicitis', cost: 5000 },
-  { recordid: 2, personalid: 2, PersonaStatus: 'Discharged', date: '2023-06-10', treatmentname: 'Physical Therapy', problem: 'Back Pain', cost: 300 },
-  { recordid: 3, personalid: 3, PersonaStatus: 'Admitted', date: '2023-06-15', treatmentname: 'Medication', problem: 'Hypertension', cost: 150 },
-  { recordid: 4, personalid: 4, PersonaStatus: 'Discharged', date: '2023-06-20', treatmentname: 'Doctor Visit', problem: 'Flu', cost: 100 },
-  { recordid: 5, personalid: 5, PersonaStatus: 'Admitted', date: '2023-06-25', treatmentname: 'Surgery', problem: 'Gallstones', cost: 6000 },
-  { recordid: 6, personalid: 6, PersonaStatus: 'Discharged', date: '2023-06-30', treatmentname: 'Physical Therapy', problem: 'Shoulder Pain', cost: 400 },
-  { recordid: 7, personalid: 7, PersonaStatus: 'Admitted', date: '2023-07-01', treatmentname: 'Medication', problem: 'Diabetes', cost: 200 },
-  { recordid: 8, personalid: 8, PersonaStatus: 'Discharged', date: '2023-07-05', treatmentname: 'Doctor Visit', problem: 'Headache', cost: 80 },
-  { recordid: 9, personalid: 9, PersonaStatus: 'Admitted', date: '2023-07-10', treatmentname: 'Surgery', problem: 'Hernia', cost: 7000 },
-  { recordid: 10, personalid: 10, PersonaStatus: 'Discharged', date: '2023-07-15', treatmentname: 'Physical Therapy', problem: 'Knee Pain', cost: 350 },
-];
+  useEffect(() => {
+    const sampleJson = `[
+      {"personaid":"3","isadmitted":true,"recordid":1,"date":"01|02|03","treatmentname":"Doctor Visit","problem":"Sickness","treatmentcost":409600},
+      {"personaid":"3","isadmitted":true,"recordid":2,"date":"01|02|03","treatmentname":"Medication","problem":"Prescription","treatmentcost":2044800},
+      {"personaid":"3","isadmitted":true,"recordid":3,"date":"01|02|03","treatmentname":"Medication","problem":"Prescription","treatmentcost":2044800}
+    ]`;
 
-getPersonaRecords().then((records) => console.log(records)).catch((err) => console.log(err));
+    const patientRecords = JSON.parse(sampleJson);
+
+    const formattedPatients = patientRecords.map(patient => ({
+      PersonaID: patient.personaid,
+      PersonaStatus: patient.isadmitted ? 'Admitted' : 'Discharged',
+      RecordID: patient.recordid,
+      Date: patient.date,
+      TreatmentType: patient.treatmentname,
+      Problem: patient.problem,
+      Cost: patient.treatmentcost
+    }));
+    console.table( formattedPatients);
+
+    setPatients(formattedPatients);
+
+    //Remove the code above once you make sure getPersonaRecords() works when the actual API is ready
+     getPersonaRecords()
+      .then((records) => {
+        const formattedPatients = records.map(patient => ({
+          PersonaID: patient.personaid,
+          PersonaStatus: patient.isadmitted ? 'Admitted' : 'Discharged',
+          RecordID: patient.recordid,
+          Date: patient.date,
+          TreatmentType: patient.treatmentname,
+          Problem: patient.problem,
+          Cost: patient.treatmentcost
+        }));
+        setPatients(formattedPatients);
+      })
+      .catch((err) => console.log(err));
+
+  }, []);
 
   return (
     <Container maxWidth="lg">
