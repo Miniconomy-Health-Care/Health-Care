@@ -16,8 +16,8 @@ export const handler: SQSHandler = async (sqsEvent) => {
     const requestBody = {
             "transactions": [
               {
-                "debitAccountName": "HEALTHCARE",
-                "creditAccountName": "REVSERVICE",
+                "debitAccountName": "health-care",
+                "creditAccountName": "central-revenue-service",
                 "amount": amountDue,
                 "debitRef": `${taxType} tax payment`,
                 "creditRef": paymentId

@@ -5,9 +5,10 @@ import {httpsFetch} from '../utils/fetchUtils';
 export const handler: SQSHandler = async (sqsEvent) => {
     console.log(sqsEvent);
 
-    //send request for tax number to revenue service
+    //send request to register our business on the stock market
     const requestBody = {
-        "businessName": "HEALTHCARE"
+        "name" :"healthcare",
+        "bankAccount": "health-care"
     };
 
     const response = await httpsFetch({

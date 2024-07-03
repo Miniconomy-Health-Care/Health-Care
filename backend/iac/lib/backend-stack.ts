@@ -181,6 +181,18 @@ export class BackendStack extends cdk.Stack {
             contentBasedDeduplication: true,
         });
 
+        const sellSharesQueue = new Queue(this, 'sell-shares', {
+            queueName: 'sell-shares.fifo',
+            visibilityTimeout: Duration.minutes(5),
+            contentBasedDeduplication: true,
+        });
+
+        const registerOnStockMarketQueue = new Queue(this, 'register-on-stockmarket', {
+            queueName: 'register-on-stockmarket.fifo',
+            visibilityTimeout: Duration.minutes(5),
+            contentBasedDeduplication: true,
+        });
+
         //Lambdas
         const lambdaEnv = {
             'DB_SECRET': dbInstance.secret?.secretArn!,
@@ -193,7 +205,9 @@ export class BackendStack extends cdk.Stack {
             'PAY_DIVIDENDS_QUEUE_URL': payDividendsQueue.queueUrl,
             'GET_TAX_NUMBER_QUEUE_URL': getTaxNumberQueue.queueUrl,
             'PAY_REV_SERVICE_QUEUE_URL': payRevServiceQueue.queueUrl,
-            'SUB_NOTICE_OF_PAYMENT_TO_REV_QUEUE_URL': subNoticeOfPaymentToRevQueue.queueUrl
+            'SUB_NOTICE_OF_PAYMENT_TO_REV_QUEUE_URL': subNoticeOfPaymentToRevQueue.queueUrl,
+            'SELL_SHARES_QUEUE_URL': sellSharesQueue.queueUrl,
+            'REGISTER_ON_STOCKMARKET_QUEUE': registerOnStockMarketQueue.queueUrl
         };
 
         const lambdaAppDir = path.resolve(__dirname, '../../lambda');
@@ -297,6 +311,11 @@ export class BackendStack extends cdk.Stack {
         const subNoticeOfPaymentToRevLambda = createLambda('sub-notice-payment-rev-lambda', {
             entry: path.join(lambdaAppDir, 'subNoticeOfPaymentToRev.ts'),
             functionName: 'sub-notice-payment-rev-lambda',
+        });
+
+        const registerOnStockMarketLambda = createLambda('register-on-stockmarket-lambda', {
+            entry: path.join(lambdaAppDir, 'registerOnStockMarket.ts'),
+            functionName: 'register-on-stockmarket-lambda',
         });
 
 
@@ -422,6 +441,12 @@ export class BackendStack extends cdk.Stack {
 
         subNoticeOfPaymentToRevQueue.grantSendMessages(subNoticeOfPaymentToRevLambda);
         subNoticeOfPaymentToRevLambda.addEventSource(new SqsEventSource(subNoticeOfPaymentToRevQueue, {batchSize: 1}));
+
+        sellSharesQueue.grantSendMessages(sellSharesLambda);
+        sellSharesLambda.addEventSource(new SqsEventSource(sellSharesQueue, {batchSize: 1}));
+
+        registerOnStockMarketQueue.grantSendMessages(registerOnStockMarketLambda);
+        registerOnStockMarketLambda.addEventSource(new SqsEventSource(registerOnStockMarketQueue, {batchSize: 1}));
 
     }
 }

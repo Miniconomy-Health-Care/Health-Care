@@ -23,6 +23,8 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
         await sendQueueMessage(queueUrl, date);
 
+        //Register business on stock exchange at the start of the simulation
+
         try {
             const startTime = body.startTime;
             const millis = new Date(`${startTime}Z`).getTime();
