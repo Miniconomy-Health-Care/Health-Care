@@ -5,6 +5,7 @@ import {GitHubStackProps} from './githubStackProps';
 import {
     JsonSchemaType,
     LambdaIntegration,
+    MethodLoggingLevel,
     Model,
     RequestValidator,
     RestApi,
@@ -271,7 +272,7 @@ export class BackendStack extends cdk.Stack {
         const domainName = 'api.care.projects.bbdgrad.com';
 
         const api = new RestApi(this, `${appName}-api-gateway`, {
-            deployOptions: {stageName: 'prod', tracingEnabled: true},
+            deployOptions: {stageName: 'prod', tracingEnabled: true, loggingLevel: MethodLoggingLevel.INFO},
             restApiName: `${appName}-api`,
             domainName: {
                 domainName: domainName,
@@ -281,7 +282,8 @@ export class BackendStack extends cdk.Stack {
                     key: 'truststore.pem'
                 },
                 securityPolicy: SecurityPolicy.TLS_1_2
-            }
+            },
+            cloudWatchRole: true
         });
 
         //TODO copy to new api and update resource linking
