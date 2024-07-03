@@ -1,6 +1,7 @@
 import {SQSHandler} from 'aws-lambda';
-import {getSqlPool} from '../utils/dbUtils';
 import {httpsFetch} from '../utils/fetchUtils';
+import assert from 'node:assert';
+import {sendQueueMessage} from '../utils/queueUtils';
 
 export const handler: SQSHandler = async (sqsEvent) => {
     console.log(sqsEvent);
@@ -13,17 +14,17 @@ export const handler: SQSHandler = async (sqsEvent) => {
 
     const response = await httpsFetch({
         method: 'POST',
-        host: 'api.mers.projects.bbdgrad.com',
-        path: '/api/taxpayer/business/register'
+        host: 'api.mese.projects.bbdgrad.com',
+        path: '/businesses'
     }, requestBody);
 
     if (response.statusCode !== 200) {
-        throw new Error('Failed to request tax number');
+        throw new Error('Failed to register business on stock market');
     }
 
-    const taxNumber = response.body.taxId;
+    const queueUrl = process.env.SELL_SHARES_QUEUE_URL;
+    assert(queueUrl, 'SELL_SHARES_QUEUE_URL was not set');
 
-    const pool = await getSqlPool();
-    const query = 'INSERT INTO TaxNumber (tax_id) VALUES ($1);';
-    const queryRes = await pool.query(query, [taxNumber]);
-};
+    await sendQueueMessage(queueUrl, {});
+
+}

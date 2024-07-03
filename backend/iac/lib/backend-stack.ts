@@ -193,6 +193,18 @@ export class BackendStack extends cdk.Stack {
             contentBasedDeduplication: true,
         });
 
+        const payUserDividendsQueue = new Queue(this, 'pay-user-dividends', {
+            queueName: 'pay-user-dividends.fifo',
+            visibilityTimeout: Duration.minutes(5),
+            contentBasedDeduplication: true,
+        });
+
+        const payBusinessDividendsQueue = new Queue(this, 'pay-business-dividends', {
+            queueName: 'pay-business-dividends.fifo',
+            visibilityTimeout: Duration.minutes(5),
+            contentBasedDeduplication: true,
+        });
+
         //Lambdas
         const lambdaEnv = {
             'DB_SECRET': dbInstance.secret?.secretArn!,
@@ -207,7 +219,9 @@ export class BackendStack extends cdk.Stack {
             'PAY_REV_SERVICE_QUEUE_URL': payRevServiceQueue.queueUrl,
             'SUB_NOTICE_OF_PAYMENT_TO_REV_QUEUE_URL': subNoticeOfPaymentToRevQueue.queueUrl,
             'SELL_SHARES_QUEUE_URL': sellSharesQueue.queueUrl,
-            'REGISTER_ON_STOCKMARKET_QUEUE': registerOnStockMarketQueue.queueUrl
+            'REGISTER_ON_STOCKMARKET_QUEUE_URL': registerOnStockMarketQueue.queueUrl,
+            'PAY_USER_DIVIDENDS_QUEUE_URL': payUserDividendsQueue.queueUrl,
+            'PAY_BUSINESS_DIVIDENDS_QUEUE_URL': payBusinessDividendsQueue.queueUrl,
         };
 
         const lambdaAppDir = path.resolve(__dirname, '../../lambda');
@@ -317,6 +331,18 @@ export class BackendStack extends cdk.Stack {
             entry: path.join(lambdaAppDir, 'registerOnStockMarket.ts'),
             functionName: 'register-on-stockmarket-lambda',
         });
+
+        const payBusinessDividendsLambda = createLambda('pay-business-dividends-lambda', {
+            entry: path.join(lambdaAppDir, 'payBusinessDividends.ts'),
+            functionName: 'pay-business-dividends-lambda',
+        });
+
+        const payUserDividendsLambda = createLambda('pay-user-dividends-lambda', {
+            entry: path.join(lambdaAppDir, 'payUserDividends.ts'),
+            functionName: 'pay-user-dividends-lambda',
+        });
+
+
 
 
         //Event bridge rules
@@ -447,6 +473,12 @@ export class BackendStack extends cdk.Stack {
 
         registerOnStockMarketQueue.grantSendMessages(registerOnStockMarketLambda);
         registerOnStockMarketLambda.addEventSource(new SqsEventSource(registerOnStockMarketQueue, {batchSize: 1}));
+
+        payUserDividendsQueue.grantSendMessages(payUserDividendsLambda);
+        payUserDividendsLambda.addEventSource(new SqsEventSource(payUserDividendsQueue, {batchSize: 1}));
+
+        payBusinessDividendsQueue.grantSendMessages(payBusinessDividendsLambda);
+        payBusinessDividendsLambda.addEventSource(new SqsEventSource(payBusinessDividendsQueue, {batchSize: 1}));
 
     }
 }

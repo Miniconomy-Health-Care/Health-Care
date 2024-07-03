@@ -1,28 +1,24 @@
 import {SQSHandler} from 'aws-lambda';
-import {getSqlPool} from '../utils/dbUtils';
 import {httpsFetch} from '../utils/fetchUtils';
 
 export const handler: SQSHandler = async (sqsEvent) => {
     console.log(sqsEvent);
 
-    //send request for tax number to revenue service
+    //sell 49% of our 100,000 shares at the start of the simulation
     const requestBody = {
-        "businessName": "HEALTHCARE"
+        "sellerId": "healthcare",
+        "companyId": "healthcare",
+        "quantity": 49000
     };
 
     const response = await httpsFetch({
         method: 'POST',
-        host: 'api.mers.projects.bbdgrad.com',
-        path: '/api/taxpayer/business/register'
+        host: 'api.mese.projects.bbdgrad.com',
+        path: '/stocks/sell'
     }, requestBody);
 
     if (response.statusCode !== 200) {
-        throw new Error('Failed to request tax number');
+        throw new Error('Failed to sell 49% of shares');
     }
 
-    const taxNumber = response.body.taxId;
-
-    const pool = await getSqlPool();
-    const query = 'INSERT INTO TaxNumber (tax_id) VALUES ($1);';
-    const queryRes = await pool.query(query, [taxNumber]);
 };
