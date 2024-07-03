@@ -11,11 +11,11 @@ const BarchartReport = ({ data }) => {
         <YAxis />
         <Tooltip formatter={(value) => new Intl.NumberFormat('en').format(value)} />
         <Legend />
-        <Bar dataKey="revenue" fill="#E67E22">
+        <Bar dataKey="transactions" fill="#E67E22">
           {
             data.map((entry, index) => (
-              <text key={`label-${index}`} fill="#000" fontSize={12} x={entry.month} y={entry.revenue + 10}>
-                {entry.revenue} USD
+              <text key={`label-${index}`} fill="#000" fontSize={12} x={entry.month} y={entry.transactions + 10}>
+                {entry.transactions} USD
               </text>
             ))
           }
