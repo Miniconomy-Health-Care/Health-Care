@@ -26,3 +26,4 @@ export const getCurrentDate = async (): Promise<customDate> => {
 
     return {day, month, year, str: `${yearStr}|${monthStr}|${dayStr}`};
 }
+
