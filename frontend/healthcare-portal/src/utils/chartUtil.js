@@ -40,7 +40,7 @@ export const getBarChartData = (json) => {
     const month = date.toLocaleString('default', { month: 'short' });
 
     if (item.status === "completed") {
-      monthlyTransactions[month] += item.amount;
+      monthlyTransactions[month] += 1;
     }
   });
 
