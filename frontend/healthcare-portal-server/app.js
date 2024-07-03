@@ -49,6 +49,7 @@ app.get('/verifyToken', async (req, res) => {
 
 
 app.get('*', async (req, res) => {
+  res.header("Access-Control-Allow-Origin", "*");
   const code = req.query.code;
     if (code) {
       let token = await getToken(code);
