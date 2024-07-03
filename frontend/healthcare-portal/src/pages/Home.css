@@ -42,12 +42,10 @@
 }
 
 .content {
-  flex-grow: 1;
   padding: 24px;
   background-color: #2C3E50;
   min-height: 100vh;
-  overflow: hidden; /* Prevent scrolling */
-  margin-left: 90px; /* Ensure this matches the drawer width */
+  overflow: hidden;
 }
 
 .card {

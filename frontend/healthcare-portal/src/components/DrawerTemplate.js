@@ -1,15 +1,24 @@
-import React, { useState } from 'react';
-import { Typography, Drawer, List, ListItem, ListItemIcon, ListItemText, IconButton } from '@mui/material';
-import { Link } from 'react-router-dom';
-import { Dashboard, Category, Menu } from '@mui/icons-material';
-import LogoutIcon from '@mui/icons-material/Logout';
-import { useTheme, useMediaQuery } from '@mui/material';
+import React, { useState } from "react";
+import {
+  Typography,
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  IconButton,
+  Stack,
+} from "@mui/material";
+import { Link } from "react-router-dom";
+import { Dashboard, Category, Menu } from "@mui/icons-material";
+import LogoutIcon from "@mui/icons-material/Logout";
+import { useTheme, useMediaQuery } from "@mui/material";
 import Cookies from "js-cookie";
 import '../pages/Home.css'; // Adjust the path as necessary
 
 const DrawerTemplate = () => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleDrawerToggle = () => {
@@ -17,7 +26,7 @@ const DrawerTemplate = () => {
   };
 
   const logout = () => {
-    Cookies.remove('jwt');
+    Cookies.remove("jwt");
     window.location.reload();
   };
 
@@ -37,27 +46,45 @@ const DrawerTemplate = () => {
       </div>
       <List>
         {drawerItems.map((item, index) => (
-          <ListItem button key={item.text} component={Link} to={item.route} onClick={handleDrawerToggle}>
-            <ListItemIcon style={{ color: '#2C3E50' }}>
+          <ListItem
+            button
+            key={item.text}
+            component={Link}
+            to={item.route}
+            onClick={handleDrawerToggle}
+          >
+            <ListItemIcon style={{ color: "#2C3E50" }}>
               {item.icon}
             </ListItemIcon>
-            <ListItemText primary={item.text} style={{ color: '#2C3E50' }} />
+            <ListItemText primary={item.text} style={{ color: "#2C3E50" }} />
           </ListItem>
         ))}
-        <ListItem button key={'Logout'} onClick={logout}>
-          <ListItemIcon style={{ color: '#2C3E50' }}>
+        <ListItem button key={"Logout"} onClick={logout}>
+          <ListItemIcon style={{ color: "#2C3E50" }}>
             <LogoutIcon />
           </ListItemIcon>
-          <ListItemText primary={'Logout'} style={{ color: '#2C3E50' }} />
+          <ListItemText primary={"Logout"} style={{ color: "#2C3E50" }} />
         </ListItem>
       </List>
     </div>
   );
 
+  const iconButtonStyle = { alignSelf: "start" };
+
+  const drawerStyle = {
+    width: "7rem",
+    flexShrink: 0,
+    "& .MuiDrawer-paper": {
+      width: "15rem",
+      boxSizing: "border-box",
+    },
+  };
+
   return (
     <>
       {isMobile && (
         <IconButton
+          sx={iconButtonStyle}
           color="inherit"
           aria-label="open drawer"
           edge="start"
@@ -67,17 +94,20 @@ const DrawerTemplate = () => {
           <Menu />
         </IconButton>
       )}
-      <Drawer
-        variant={isMobile ? "temporary" : "permanent"}
-        open={isMobile ? mobileOpen : true}
-        onClose={handleDrawerToggle}
-        classes={{ paper: 'drawerPaper' }}
-        ModalProps={{
-          keepMounted: true, // Better open performance on mobile.
-        }}
-      >
-        {drawerContent}
-      </Drawer>
+      <Stack flexDirection={"column"} alignItems={"start"}>
+        <Drawer
+          sx={drawerStyle}
+          variant={isMobile ? "temporary" : "permanent"}
+          open={isMobile ? mobileOpen : true}
+          onClose={handleDrawerToggle}
+          classes={{ paper: "drawerPaper" }}
+          ModalProps={{
+            keepMounted: true,
+          }}
+        >
+          {drawerContent}
+        </Drawer>
+      </Stack>
     </>
   );
 };

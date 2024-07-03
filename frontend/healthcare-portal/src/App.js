@@ -6,6 +6,7 @@ import Patients from './pages/Patients';
 import Taxes from './pages/Taxes';
 import Transactions from './pages/Transactions';
 import DrawerTemplate from './components/DrawerTemplate';
+import {  Box  } from '@mui/material';
 import './pages/Home.css';
 
 const App = () => {
@@ -19,6 +20,7 @@ const App = () => {
   return (
     <div className="root">
       <CssBaseline />
+      <Box display = "flex" >
       <DrawerTemplate />
       <main className="content">
         <Routes>
@@ -30,6 +32,7 @@ const App = () => {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
+      </Box>
     </div>
   );
 };
