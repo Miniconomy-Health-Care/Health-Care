@@ -13,7 +13,7 @@ export const handler = async () => {
             PAY_INCOME_TAX_QUEUE_URL: incomeTaxQueue,
             PAY_VAT_QUEUE_URL: vatQueue,
             BUY_SHARES_QUEUE_URL: buySharesQueue,
-            PAY_DIVIDENDS_QUEUE_URL: payDividendsQueue
+            PAY_DIVIDENDS_QUEUE_URL: payDividendsQueue,
         } = process.env;
 
         assert(incomeTaxQueue, 'PAY_INCOME_TAX_QUEUE_URL not set');

@@ -3,6 +3,7 @@ DROP TABLE IF EXISTS tax;
 DROP TABLE IF EXISTS taxtype;
 DROP TABLE IF EXISTS treatment;
 DROP TABLE IF EXISTS persona;
+DROP TABLE IF EXISTS taxnumber;
 
 CREATE TABLE Persona (
     personaId BIGINT PRIMARY KEY,
@@ -40,6 +41,10 @@ CREATE TABLE Time
 (
     timeId    SERIAL PRIMARY KEY,
     startTime BIGINT
+);
+
+CREATE TABLE TaxNumber(
+    tax_id VARCHAR(50) PRIMARY KEY
 );
 
 ALTER TABLE Record
