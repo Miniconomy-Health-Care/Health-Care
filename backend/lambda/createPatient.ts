@@ -13,8 +13,8 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
     const query = 'CALL add_patient_record($1, $2)';
     const result = await pool.query(query, [personaId, date]);
 
-    const queueUrl = process.env.CHARGE_HEALTH_INSURANCE_QUEUE_URL;
-    assert(queueUrl, 'CHARGE_HEALTH_INSURANCE_QUEUE_URL was not set');
+    const queueUrl = process.env.CHECK_PATIENT_DIED_QUEUE_URL;
+    assert(queueUrl, 'CHECK_PATIENT_DIED_QUEUE_URL was not set');
 
     const getPatientRecordQuery = 'SELECT treatmentCost, recordId FROM PatientRecordView WHERE personaId=$1 ORDER BY recordid DESC LIMIT 1';
     const res = await pool.query(getPatientRecordQuery, [personaId]);
