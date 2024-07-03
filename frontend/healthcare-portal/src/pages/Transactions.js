@@ -1,9 +1,9 @@
 import React, { useEffect, useState }  from 'react';
 import { Container, Paper, Typography } from '@mui/material';
 import TableTemplate from '../components/TableTemplate';
-import { getTransactionRecords } from '../api/api';
+import { getBankTransactions } from '../api/api';
 const Transactions = () => {
-  const columns = ['ID','Debit Account Name','Credit Account Name','Reference','Amount','Date','Status'];
+  const columns = ['Transaction ID','Debit Account Name','Credit Account Name','Reference','Amount','Date','Status'];
   const [transactions,setTransactions] = useState([]);
 
   useEffect(() => {
@@ -25,7 +25,7 @@ const Transactions = () => {
     setTransactions(formattedTransactions);
 
     //Remove the code above once you make sure getTransactionRecords() works when the actual API is ready
-    getTransactionRecords()
+    getBankTransactions()
       .then((records) => {
         const formattedTransactions = records.map(transaction => ({
           'ID' : transaction.transactionId,
