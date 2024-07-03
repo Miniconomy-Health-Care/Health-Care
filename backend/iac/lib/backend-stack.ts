@@ -21,7 +21,6 @@ import * as path from 'path';
 import {SqsEventSource} from 'aws-cdk-lib/aws-lambda-event-sources';
 import {Queue} from 'aws-cdk-lib/aws-sqs';
 import {Secret} from 'aws-cdk-lib/aws-secretsmanager';
-import {Bucket} from 'aws-cdk-lib/aws-s3';
 import {Certificate} from 'aws-cdk-lib/aws-certificatemanager';
 import {Rule, Schedule} from 'aws-cdk-lib/aws-events';
 import {addLambdaPermission, LambdaFunction} from 'aws-cdk-lib/aws-events-targets';
@@ -408,10 +407,10 @@ export class BackendStack extends cdk.Stack {
             domainName: {
                 domainName: domainName,
                 certificate: Certificate.fromCertificateArn(this, 'api-cert', 'arn:aws:acm:eu-west-1:363615071302:certificate/8c0eecf5-8298-4521-990a-9fc3c9d54dd7'),
-                mtls: {
-                    bucket: Bucket.fromBucketName(this, 'truststore-bucket', 'miniconomy-trust-store-bucket'),
-                    key: 'truststore.pem'
-                },
+                // mtls: {
+                //     bucket: Bucket.fromBucketName(this, 'truststore-bucket', 'miniconomy-trust-store-bucket'),
+                //     key: 'truststore.pem'
+                // },
                 securityPolicy: SecurityPolicy.TLS_1_2
             }
         });
