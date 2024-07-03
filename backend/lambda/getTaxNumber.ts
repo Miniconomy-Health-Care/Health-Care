@@ -7,7 +7,7 @@ export const handler: SQSHandler = async (sqsEvent) => {
 
     //send request for tax number to revenue service
     const requestBody = {
-        "businessName": "HEALTHCARE"
+        'businessName': 'health_care'
     };
 
     const response = await httpsFetch({

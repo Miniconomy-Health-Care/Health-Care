@@ -508,6 +508,7 @@ export class BackendStack extends cdk.Stack {
         payDividendsLambda.addEventSource(new SqsEventSource(payDividendsQueue, {batchSize: 1}));
 
         getTaxNumberQueue.grantSendMessages(simulationEventsLambda);
+        getTaxNumberQueue.grantSendMessages(syncTimeLambda);
         getTaxNumberLamda.addEventSource(new SqsEventSource(getTaxNumberQueue, {batchSize: 1}));
 
         payRevServiceQueue.grantSendMessages(payIncomeTaxLambda);
@@ -521,6 +522,7 @@ export class BackendStack extends cdk.Stack {
         sellSharesLambda.addEventSource(new SqsEventSource(sellSharesQueue, {batchSize: 1}));
 
         registerOnStockMarketQueue.grantSendMessages(simulationEventsLambda);
+        registerOnStockMarketQueue.grantSendMessages(syncTimeLambda);
         registerOnStockMarketLambda.addEventSource(new SqsEventSource(registerOnStockMarketQueue, {batchSize: 1}));
 
         payUserDividendsQueue.grantSendMessages(payDividendsLambda);
@@ -537,5 +539,37 @@ export class BackendStack extends cdk.Stack {
 
         checkPatientDiedQueue.grantSendMessages(createPatientLambda);
         checkIfPatientDiedLambda.addEventSource(new SqsEventSource(checkPatientDiedQueue, {batchSize: 1}));
+
+        chargeHealthInsuranceQueue.grantPurge(syncTimeLambda);
+        payIncomeTaxQueue.grantPurge(syncTimeLambda);
+        payVatQueue.grantPurge(syncTimeLambda);
+        buySharesQueue.grantPurge(syncTimeLambda);
+        payDividendsQueue.grantPurge(syncTimeLambda);
+        getTaxNumberQueue.grantPurge(syncTimeLambda);
+        payRevServiceQueue.grantPurge(syncTimeLambda);
+        subNoticeOfPaymentToRevQueue.grantPurge(syncTimeLambda);
+        sellSharesQueue.grantPurge(syncTimeLambda);
+        registerOnStockMarketQueue.grantPurge(syncTimeLambda);
+        payUserDividendsQueue.grantPurge(syncTimeLambda);
+        payBusinessDividendsQueue.grantPurge(syncTimeLambda);
+        buyBusinessSharesQueue.grantPurge(syncTimeLambda);
+        dischargePatientQueue.grantPurge(syncTimeLambda);
+        checkPatientDiedQueue.grantPurge(syncTimeLambda);
+
+        chargeHealthInsuranceQueue.grantPurge(simulationEventsLambda);
+        payIncomeTaxQueue.grantPurge(simulationEventsLambda);
+        payVatQueue.grantPurge(simulationEventsLambda);
+        buySharesQueue.grantPurge(simulationEventsLambda);
+        payDividendsQueue.grantPurge(simulationEventsLambda);
+        getTaxNumberQueue.grantPurge(simulationEventsLambda);
+        payRevServiceQueue.grantPurge(simulationEventsLambda);
+        subNoticeOfPaymentToRevQueue.grantPurge(simulationEventsLambda);
+        sellSharesQueue.grantPurge(simulationEventsLambda);
+        registerOnStockMarketQueue.grantPurge(simulationEventsLambda);
+        payUserDividendsQueue.grantPurge(simulationEventsLambda);
+        payBusinessDividendsQueue.grantPurge(simulationEventsLambda);
+        buyBusinessSharesQueue.grantPurge(simulationEventsLambda);
+        dischargePatientQueue.grantPurge(simulationEventsLambda);
+        checkPatientDiedQueue.grantPurge(simulationEventsLambda);
     }
 }
