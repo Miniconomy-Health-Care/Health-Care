@@ -421,6 +421,7 @@ export class BackendStack extends cdk.Stack {
             deployOptions: {stageName: 'prod'},
             restApiName: `${appName}-private-api`,
             defaultCorsPreflightOptions: {
+                allowHeaders: ['*'],
                 allowOrigins: Cors.ALL_ORIGINS,
                 allowMethods: Cors.ALL_METHODS
             },
