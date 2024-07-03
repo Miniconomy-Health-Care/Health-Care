@@ -1,18 +1,25 @@
-import React from 'react';
-import { Typography, Drawer, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+import React, { useState } from 'react';
+import { Typography, Drawer, List, ListItem, ListItemIcon, ListItemText, IconButton } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { Dashboard, Category } from '@mui/icons-material';
+import { Dashboard, Category, Menu } from '@mui/icons-material';
 import LogoutIcon from '@mui/icons-material/Logout';
+import { useTheme, useMediaQuery } from '@mui/material';
+import Cookies from "js-cookie";
 import '../pages/Home.css'; // Adjust the path as necessary
 
-import Cookies from "js-cookie";
-
 const DrawerTemplate = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-  function logout(){
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
+  const logout = () => {
     Cookies.remove('jwt');
-    window.location.reload()
-  }
+    window.location.reload();
+  };
 
   const drawerItems = [
     { text: 'Dashboard', icon: <Dashboard />, route: '/Home' },
@@ -21,30 +28,57 @@ const DrawerTemplate = () => {
     { text: 'Stocks', icon: <Category />, route: '/Stocks' },
   ];
 
-  return (
-    <Drawer variant="permanent" classes={{ paper: 'drawerPaper' }}>
+  const drawerContent = (
+    <div>
       <div className="toolbar">
-        <Typography variant="h6" className="drawerTitle" align='center'>
+        <Typography variant="h6" className="drawerTitle" align="center">
           Health Care Portal
         </Typography>
       </div>
       <List>
         {drawerItems.map((item, index) => (
-          <ListItem button key={item.text} component={Link} to={item.route}>
+          <ListItem button key={item.text} component={Link} to={item.route} onClick={handleDrawerToggle}>
             <ListItemIcon style={{ color: '#2C3E50' }}>
               {item.icon}
             </ListItemIcon>
             <ListItemText primary={item.text} style={{ color: '#2C3E50' }} />
           </ListItem>
         ))}
-        <ListItem button key={'Logout'} onClick={() => logout()}>
-            <ListItemIcon style={{ color: '#2C3E50' }}>
-              <LogoutIcon />
-            </ListItemIcon>
-            <ListItemText primary={'Logout'} style={{ color: '#2C3E50' }} />
-          </ListItem>
+        <ListItem button key={'Logout'} onClick={logout}>
+          <ListItemIcon style={{ color: '#2C3E50' }}>
+            <LogoutIcon />
+          </ListItemIcon>
+          <ListItemText primary={'Logout'} style={{ color: '#2C3E50' }} />
+        </ListItem>
       </List>
-    </Drawer>
+    </div>
+  );
+
+  return (
+    <>
+      {isMobile && (
+        <IconButton
+          color="inherit"
+          aria-label="open drawer"
+          edge="start"
+          onClick={handleDrawerToggle}
+          className="menuButton"
+        >
+          <Menu />
+        </IconButton>
+      )}
+      <Drawer
+        variant={isMobile ? "temporary" : "permanent"}
+        open={isMobile ? mobileOpen : true}
+        onClose={handleDrawerToggle}
+        classes={{ paper: 'drawerPaper' }}
+        ModalProps={{
+          keepMounted: true, // Better open performance on mobile.
+        }}
+      >
+        {drawerContent}
+      </Drawer>
+    </>
   );
 };
 

@@ -14,8 +14,8 @@ const Taxes = () => {
 
   return (
     <Container>
-      <Typography variant="h4" align="center" className="tableHeading">Taxes Table</Typography>
       <Paper className="tablePaper">
+        <Typography variant="h4" align="center" className="tableHeading">Taxes Table</Typography>
         <TableTemplate columns={columns} rows={taxes} />
       </Paper>
     </Container>
