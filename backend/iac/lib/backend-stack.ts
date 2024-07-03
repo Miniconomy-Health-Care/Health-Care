@@ -421,8 +421,10 @@ export class BackendStack extends cdk.Stack {
             deployOptions: {stageName: 'prod'},
             restApiName: `${appName}-private-api`,
             defaultCorsPreflightOptions: {
-                allowOrigins: Cors.ALL_ORIGINS,
-                allowMethods: Cors.ALL_METHODS
+                allowHeaders: Cors.DEFAULT_HEADERS,
+                allowOrigins: ['http://localhost:8080', 'https://care.projects.bbdgrad.com'],
+                allowMethods: Cors.ALL_METHODS,
+                allowCredentials: true,
             },
             defaultMethodOptions: {
                 authorizationType: AuthorizationType.COGNITO,
@@ -430,7 +432,7 @@ export class BackendStack extends cdk.Stack {
                     authorizerName: 'cognito-api-authorizer',
                     cognitoUserPools: [cognitoUserPool],
                     resultsCacheTtl: Duration.minutes(30)
-                })
+                }),
             }
         });
 

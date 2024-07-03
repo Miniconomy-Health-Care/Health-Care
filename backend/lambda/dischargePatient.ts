@@ -3,7 +3,7 @@ import {getSqlPool} from '../utils/dbUtils';
 import {sendQueueMessage} from '../utils/queueUtils';
 import assert from 'node:assert';
 
-const handler: SQSHandler = async (event) => {
+export const handler: SQSHandler = async (event) => {
     const body = JSON.parse(event.Records[0].body);
     const queueUrl = process.env.CHARGE_HEALTH_INSURANCE_QUEUE_URL;
     assert(queueUrl, "CHARGE_HEALTH_INSURANCE_QUEUE_URL not set");

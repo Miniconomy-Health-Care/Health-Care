@@ -1,5 +1,6 @@
-import { APIGatewayProxyHandler } from 'aws-lambda';
+import {APIGatewayProxyHandler} from 'aws-lambda';
 import {httpsFetch} from '../utils/fetchUtils';
+import {Cors} from 'aws-cdk-lib/aws-apigateway';
 
 export const handler: APIGatewayProxyHandler = async (event, context) => {
     try {
@@ -13,14 +14,28 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
             console.error('Failed to request commercial bank:', response.body);
             return {
                 statusCode: response.statusCode as number,
-                body: JSON.stringify(response.body)
+                body: JSON.stringify(response.body),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Headers': Cors.DEFAULT_HEADERS.join(','),
+                    'Access-Control-Allow-Origin': Cors.ALL_ORIGINS.join(','),
+                    'Access-Control-Allow-Methods': Cors.ALL_METHODS.join(','),
+                    'Vary': 'Origin'
+                },
             };
         }
 
         console.log('Successfully retrieved account balance');
         return {
             statusCode: 200,
-            body: JSON.stringify(response.body)
+            body: JSON.stringify(response.body),
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Headers': Cors.DEFAULT_HEADERS.join(','),
+                'Access-Control-Allow-Origin': Cors.ALL_ORIGINS.join(','),
+                'Access-Control-Allow-Methods': Cors.ALL_METHODS.join(','),
+                'Vary': 'Origin'
+            },
         };
     } catch (error) {
         console.error('Error:', error);
@@ -30,7 +45,14 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
         }
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: errorMessage })
+            body: JSON.stringify({error: errorMessage}),
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Headers': Cors.DEFAULT_HEADERS.join(','),
+                'Access-Control-Allow-Origin': Cors.ALL_ORIGINS.join(','),
+                'Access-Control-Allow-Methods': Cors.ALL_METHODS.join(','),
+                'Vary': 'Origin'
+            },
         };
     }
 };
