@@ -14,7 +14,7 @@ export const httpsFetch = async (options: https.RequestOptions, requestBody?: Re
         new GetSecretValueCommand({
             SecretId: process.env.CERT_SECRET,
         }));
-    
+
     const keySecretResponse = await secretManagerClient.send(
         new GetSecretValueCommand({
             SecretId: process.env.KEY_SECRET,
@@ -22,14 +22,15 @@ export const httpsFetch = async (options: https.RequestOptions, requestBody?: Re
 
     const certificate = certSecretResponse.SecretString ?? '';
     const privateKey = keySecretResponse.SecretString ?? '';
-    
+
     const opts: https.RequestOptions = {
         ...options,
+        headers: {...options.headers, 'X-Origin': 'health_care'},
         port: 443,
         cert: certificate,
         key: privateKey
-    }
-    
+    };
+
     return new Promise((resolve, reject) => {
         const req = https.request(opts, (res) => {
             res.setEncoding('utf8');
@@ -51,10 +52,10 @@ export const httpsFetch = async (options: https.RequestOptions, requestBody?: Re
             reject(err);
         });
 
-        if(requestBody){
+        if (requestBody) {
             req.write(JSON.stringify(requestBody));
         }
-        
+
         req.end();
-    })
+    });
 };
