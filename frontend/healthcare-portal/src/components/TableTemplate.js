@@ -1,83 +1,83 @@
 import React, { useState } from 'react';
-import {
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, TableSortLabel, Box
-} from '@mui/material';
-import '../pages/Home.css'
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, TableSortLabel } from '@mui/material';
 
 const TableTemplate = ({ columns, rows }) => {
-  const [searchText, setSearchText] = useState('');
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortedRows, setSortedRows] = useState(rows);
+  const [orderDirection, setOrderDirection] = useState('asc');
+  const [orderBy, setOrderBy] = useState('');
 
-  const handleSearchChange = (event) => {
-    setSearchText(event.target.value);
+  const handleSearch = (event) => {
+    setSearchQuery(event.target.value);
+    const filteredRows = rows.filter(row => {
+      return columns.some(column => {
+        const cellValue = row[column.toLowerCase().replace(/ /g, '')];
+        return cellValue.toString().toLowerCase().includes(event.target.value.toLowerCase());
+      });
+    });
+    setSortedRows(filteredRows);
   };
 
-  const filteredRows = rows.filter((row) =>
-    columns.some((column) => row[column.toLowerCase().replace(/ /g, '')].toString().toLowerCase().includes(searchText.toLowerCase()))
-  );
+  const handleSort = (column) => {
+    const isAsc = orderBy === column && orderDirection === 'asc';
+    setOrderDirection(isAsc ? 'desc' : 'asc');
+    setOrderBy(column);
 
-  const sortedRows = [...filteredRows].sort((a, b) => {
-    if (sortConfig.key === null) {
+    const sorted = [...sortedRows].sort((a, b) => {
+      if (a[column] < b[column]) {
+        return isAsc ? -1 : 1;
+      }
+      if (a[column] > b[column]) {
+        return isAsc ? 1 : -1;
+      }
       return 0;
-    }
-    const aValue = a[sortConfig.key];
-    const bValue = b[sortConfig.key];
-    if (aValue < bValue) {
-      return sortConfig.direction === 'asc' ? -1 : 1;
-    }
-    if (aValue > bValue) {
-      return sortConfig.direction === 'asc' ? 1 : -1;
-    }
-    return 0;
-  });
+    });
 
-  const handleSort = (columnKey) => {
-    let direction = 'asc';
-    if (sortConfig.key === columnKey && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    }
-    setSortConfig({ key: columnKey, direction });
+    setSortedRows(sorted);
   };
 
   return (
-    <Box>
+    <TableContainer>
       <TextField
-        label="Search"
         variant="outlined"
-        value={searchText}
-        onChange={handleSearchChange}
+        placeholder="Search"
         fullWidth
         margin="normal"
+        onChange={handleSearch}
+        value={searchQuery}
+        InputProps={{
+          style: { marginBottom: '16px' },
+        }}
       />
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              {columns.map((column, index) => (
-                <TableCell key={index}>
-                  <TableSortLabel
-                    active={sortConfig.key === column.toLowerCase().replace(/ /g, '')}
-                    direction={sortConfig.key === column.toLowerCase().replace(/ /g, '') ? sortConfig.direction : 'asc'}
-                    onClick={() => handleSort(column.toLowerCase().replace(/ /g, ''))}
-                  >
-                    {column}
-                  </TableSortLabel>
+      <Table>
+        <TableHead>
+          <TableRow>
+            {columns.map((column, index) => (
+              <TableCell key={index} className="MuiTableCell-head">
+                <TableSortLabel
+                  active={orderBy === column.toLowerCase().replace(/ /g, '')}
+                  direction={orderBy === column.toLowerCase().replace(/ /g, '') ? orderDirection : 'asc'}
+                  onClick={() => handleSort(column.toLowerCase().replace(/ /g, ''))}
+                >
+                  {column}
+                </TableSortLabel>
+              </TableCell>
+            ))}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {sortedRows.map((row, rowIndex) => (
+            <TableRow key={rowIndex} className="MuiTableRow-root">
+              {Object.values(row).map((value, cellIndex) => (
+                <TableCell key={cellIndex} className="MuiTableCell-body">
+                  {value}
                 </TableCell>
               ))}
             </TableRow>
-          </TableHead>
-          <TableBody>
-            {sortedRows.map((row, rowIndex) => (
-              <TableRow key={rowIndex}>
-                {columns.map((column, colIndex) => (
-                  <TableCell key={colIndex}>{row[column.toLowerCase().replace(/ /g, '')]}</TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Box>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 };
 

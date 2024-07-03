@@ -1,4 +1,3 @@
-// Patients.js
 import React from 'react';
 import { Container, Paper, Typography } from '@mui/material';
 import TableTemplate from '../components/TableTemplate';
@@ -14,7 +13,7 @@ const Patients = () => {
 
   return (
     <Container>
-      <Typography variant="h4" align="center" className="tableHeading">Patients Table</Typography>
+      <Typography variant="h4" align="center" className="tableHeading">Personas Table</Typography>
       <Paper className="tablePaper">
         <TableTemplate columns={columns} rows={patients} />
       </Paper>
