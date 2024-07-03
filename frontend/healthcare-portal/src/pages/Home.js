@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Container, Grid, Paper, Box, Typography } from '@mui/material';
 import PieChartComponent from '../components/PiechartReport';
 import BarchartReport from '../components/BarchartReport';
@@ -27,45 +27,56 @@ const barChartData = [
   { month: 'Dec', revenue: 8000 },
 ];
 
+const initialStyleArray = [
+  { css: "card persona", colour: {backgroundColor : "#3498DB"} , title: "Personas", count: 0 },
+  { css: "card stock", colour: {backgroundColor : "#E67E22"}, title: "Stocks", count: 0  }, 
+  { css: "card tax", colour: {backgroundColor : "#2ECC71"}, title: "Taxes", count: 0}, 
+  { css: "card revenue", colour: {backgroundColor : "#E74C3C"}, title: "Revenue", count: 0 },
+]
+
+
 const Home = () => {
+
+ const getRandomInt = (min, max) => {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min; 
+  }
+  const [styleArray, setStyleArray] = useState(initialStyleArray);
+
+  useEffect(() => {
+    
+    const numPersona = getRandomInt(10, 20);
+    const numStocks = getRandomInt(10, 20);
+    const numTax = getRandomInt(10, 20);
+    const numRevenue = getRandomInt(10, 20);
+    
+    const countArray = [numPersona, numStocks, numTax, numRevenue];
+
+    const updatedStyleArray = styleArray.map((style, index) => ({
+      ...style,
+      count: countArray[index],
+    }));
+
+    setStyleArray(updatedStyleArray);
+  },[])
+
   return (
     <div className="root">
       <main className="content">
         <Container maxWidth="lg">
           <Grid container spacing={3}>
             {/* Cards */}
-            <Grid item xs={12} sm={6} md={3}>
-              <Paper className="card persona">
-                <Box>
-                  <Typography variant="h5" className="cardTitle">Personas</Typography>
-                  <Typography variant="h3">249</Typography>
-                </Box>
-              </Paper>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Paper className="card stock">
-                <Box>
-                  <Typography variant="h5" className="cardTitle">Stocks</Typography>
-                  <Typography variant="h3">25</Typography>
-                </Box>
-              </Paper>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Paper className="card tax">
-                <Box>
-                  <Typography variant="h5" className="cardTitle">Taxes</Typography>
-                  <Typography variant="h3">150</Typography>
-                </Box>
-              </Paper>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Paper className="card revenue">
-                <Box>
-                  <Typography variant="h5" className="cardTitle">Revenue</Typography>
-                  <Typography variant="h3">56</Typography>
-                </Box>
-              </Paper>
-            </Grid>
+            {styleArray.map((style, index) => (
+                <Grid item xs={12} sm={6} md={3}>
+                  <Paper className={style.css} sx = {style.colour} >
+                    <Box>
+                      <Typography variant="h5" className="cardTitle">{style.title}</Typography>
+                      <Typography variant="h3">{style.count}</Typography>
+                    </Box>
+                  </Paper>
+                </Grid>
+            ))}
             {/* Pie Chart and Bar Chart */}
             <Grid item xs={12} md={6}>
               <Paper className="pieChartPaper">
