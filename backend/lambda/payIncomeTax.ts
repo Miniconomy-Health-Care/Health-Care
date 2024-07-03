@@ -18,7 +18,7 @@ export const handler: SQSHandler = async (sqsEvent) => {
     const taxNumber = taxNumberQueryRes.rows[0].tax_id;
 
     const yearlyCostsQuery = 'SELECT CalculateYearlyCosts($1)';
-    const yearlyCostsQueryRes = await pool.query(yearlyCostsQuery, [date.year]);
+    const yearlyCostsQueryRes = await pool.query(yearlyCostsQuery, [date.year - 1]);
     const yearlyCost = yearlyCostsQueryRes.rows[0].calculateyearlycosts;
 
 
