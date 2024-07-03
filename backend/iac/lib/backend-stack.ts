@@ -205,6 +205,12 @@ export class BackendStack extends cdk.Stack {
             contentBasedDeduplication: true,
         });
 
+        const buyBusinessSharesQueue = new Queue(this, 'buy-business-shares', {
+            queueName: 'buy-business-shares.fifo',
+            visibilityTimeout: Duration.minutes(5),
+            contentBasedDeduplication: true,
+        });
+
         //Lambdas
         const lambdaEnv = {
             'DB_SECRET': dbInstance.secret?.secretArn!,
@@ -222,6 +228,7 @@ export class BackendStack extends cdk.Stack {
             'REGISTER_ON_STOCKMARKET_QUEUE_URL': registerOnStockMarketQueue.queueUrl,
             'PAY_USER_DIVIDENDS_QUEUE_URL': payUserDividendsQueue.queueUrl,
             'PAY_BUSINESS_DIVIDENDS_QUEUE_URL': payBusinessDividendsQueue.queueUrl,
+            'BUY_BUSINESS_SHARES_QUEUE_URL': buyBusinessSharesQueue.queueUrl
         };
 
         const lambdaAppDir = path.resolve(__dirname, '../../lambda');
@@ -342,7 +349,10 @@ export class BackendStack extends cdk.Stack {
             functionName: 'pay-user-dividends-lambda',
         });
 
-
+        const buyBusinessSharesLambda = createLambda('buy-business-shares-lambda', {
+            entry: path.join(lambdaAppDir, 'buyBusinessShares.ts'),
+            functionName: 'buy-business-shares-lambda',
+        });
 
 
         //Event bridge rules
@@ -479,6 +489,9 @@ export class BackendStack extends cdk.Stack {
 
         payBusinessDividendsQueue.grantSendMessages(payBusinessDividendsLambda);
         payBusinessDividendsLambda.addEventSource(new SqsEventSource(payBusinessDividendsQueue, {batchSize: 1}));
+
+        buyBusinessSharesQueue.grantSendMessages(buyBusinessSharesLambda);
+        buyBusinessSharesLambda.addEventSource(new SqsEventSource(buyBusinessSharesQueue, {batchSize: 1}));
 
     }
 }
