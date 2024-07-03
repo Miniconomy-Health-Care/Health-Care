@@ -12,12 +12,11 @@ export const handler: SQSHandler = async (sqsEvent) => {
     date = JSON.parse(date);
 
     //pay tax to revenue service
-    //we need to make sure that we have the correct debit account name and credit account name
     const requestBody = {
             "transactions": [
               {
-                "debitAccountName": "HEALTHCARE",
-                "creditAccountName": "REVSERVICE",
+                "debitAccountName": "health-care",
+                "creditAccountName": "central-revenue-service",
                 "amount": amountDue,
                 "debitRef": `${taxType} tax payment`,
                 "creditRef": paymentId
