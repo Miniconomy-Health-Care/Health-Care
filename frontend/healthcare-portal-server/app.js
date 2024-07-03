@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const { CognitoJwtVerifier } = require('aws-jwt-verify');
+var cors = require('cors')
 
 const authMiddleware = function (req, res, next) {
   if(req.url === "/"){
@@ -20,6 +21,11 @@ const redirectUri = process.env.HEALTHCARE_REDIRECT_URI ?? "http://localhost:808
 
 app.use(authMiddleware, express.static(path.join(__dirname, 'build')));
 app.use(cookieParser());
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type']
+}))
 
 app.get('/test', (req, res) => {
     res.send('Health Care Portal Working!');
