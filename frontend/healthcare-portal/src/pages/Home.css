@@ -71,7 +71,7 @@
   background-color: #3498DB;
 }
 
-.stock {
+.transactions {
   background-color: #E67E22;
 }
 
@@ -79,7 +79,7 @@
   background-color: #2ECC71;
 }
 
-.revenue {
+.bankBalance {
   background-color: #E74C3C;
 }
 

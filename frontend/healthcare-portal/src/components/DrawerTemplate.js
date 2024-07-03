@@ -25,7 +25,7 @@ const DrawerTemplate = () => {
     { text: 'Dashboard', icon: <Dashboard />, route: '/Home' },
     { text: 'Personas', icon: <Category />, route: '/Patients' },
     { text: 'Taxes', icon: <Category />, route: '/Taxes' },
-    { text: 'Stocks', icon: <Category />, route: '/Stocks' },
+    { text: 'Transactions', icon: <Category />, route: '/Transactions' },
   ];
 
   const drawerContent = (

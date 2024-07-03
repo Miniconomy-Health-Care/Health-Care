@@ -29,9 +29,9 @@ const barChartData = [
 
 const initialStyleArray = [
   { css: "card persona", colour: {backgroundColor : "#3498DB"} , title: "Personas", count: 0 },
-  { css: "card stock", colour: {backgroundColor : "#E67E22"}, title: "Stocks", count: 0  }, 
+  { css: "card transactions", colour: {backgroundColor : "#E67E22"}, title: "Transactions", count: 0  }, 
   { css: "card tax", colour: {backgroundColor : "#2ECC71"}, title: "Taxes", count: 0}, 
-  { css: "card revenue", colour: {backgroundColor : "#E74C3C"}, title: "Revenue", count: 0 },
+  { css: "card bankBalance", colour: {backgroundColor : "#E74C3C"}, title: "Bank Balance", count: 0 },
 ]
 
 
