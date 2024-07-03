@@ -18,13 +18,10 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
         const date = await getCurrentDate();
 
-        const {
-            GET_TAX_NUMBER_QUEUE_URL: getTaxNumberQueue
-        } = process.env;
+        const queueUrl = process.env.GET_TAX_NUMBER_QUEUE_URL;
+        assert(queueUrl, 'GET_TAX_NUMBER_QUEUE_URL not set');
 
-        assert(getTaxNumberQueue, 'GET_TAX_NUMBER_QUEUE_URL not set');
-
-        await sendQueueMessage(getTaxNumberQueue, date);
+        await sendQueueMessage(queueUrl, date);
 
         try {
             const startTime = body.startTime;

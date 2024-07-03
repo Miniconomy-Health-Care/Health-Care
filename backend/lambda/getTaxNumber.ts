@@ -4,7 +4,6 @@ import {httpsFetch} from '../utils/fetchUtils';
 
 export const handler: SQSHandler = async (sqsEvent) => {
     console.log(sqsEvent);
-    console.log("Get Tax Number Start");
 
     //send request for tax number to revenue service
     const requestBody = {
