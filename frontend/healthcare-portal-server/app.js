@@ -21,11 +21,7 @@ const redirectUri = process.env.HEALTHCARE_REDIRECT_URI ?? "http://localhost:808
 
 app.use(authMiddleware, express.static(path.join(__dirname, 'build')));
 app.use(cookieParser());
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type']
-}))
+app.use(cors());
 
 app.get('/test', (req, res) => {
     res.send('Health Care Portal Working!');
