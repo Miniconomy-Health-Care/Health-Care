@@ -163,6 +163,24 @@ export class BackendStack extends cdk.Stack {
             contentBasedDeduplication: true,
         });
 
+        const getTaxNumberQueue = new Queue(this, 'get-tax-number', {
+            queueName: 'get-tax-number.fifo',
+            visibilityTimeout: Duration.minutes(5),
+            contentBasedDeduplication: true,
+        });
+
+        const payRevServiceQueue = new Queue(this, 'pay-rev-service', {
+            queueName: 'pay-rev-service.fifo',
+            visibilityTimeout: Duration.minutes(5),
+            contentBasedDeduplication: true,
+        });
+
+        const subNoticeOfPaymentToRevQueue = new Queue(this, 'sub-notice-payment-rev', {
+            queueName: 'sub-notice-payment-rev.fifo',
+            visibilityTimeout: Duration.minutes(5),
+            contentBasedDeduplication: true,
+        });
+
         //Lambdas
         const lambdaEnv = {
             'DB_SECRET': dbInstance.secret?.secretArn!,
@@ -172,7 +190,10 @@ export class BackendStack extends cdk.Stack {
             'PAY_INCOME_TAX_QUEUE_URL': payIncomeTaxQueue.queueUrl,
             'PAY_VAT_QUEUE_URL': payVatQueue.queueUrl,
             'BUY_SHARES_QUEUE_URL': buySharesQueue.queueUrl,
-            'PAY_DIVIDENDS_QUEUE_URL': payDividendsQueue.queueUrl
+            'PAY_DIVIDENDS_QUEUE_URL': payDividendsQueue.queueUrl,
+            'GET_TAX_NUMBER_QUEUE_URL': getTaxNumberQueue.queueUrl,
+            'PAY_REV_SERVICE_QUEUE_URL': payRevServiceQueue.queueUrl,
+            'SUB_NOTICE_OF_PAYMENT_TO_REV_QUEUE_URL': subNoticeOfPaymentToRevQueue.queueUrl
         };
 
         const lambdaAppDir = path.resolve(__dirname, '../../lambda');
@@ -269,6 +290,22 @@ export class BackendStack extends cdk.Stack {
             entry: path.join(lambdaAppDir, 'simulationEvents.ts'),
             functionName: 'simulation-events-lambda',
         });
+
+        const getTaxNumberLamda = createLambda('get-tax-number-lambda', {
+            entry: path.join(lambdaAppDir, 'getTaxNumber.ts'),
+            functionName: 'get-tax-number-lambda',
+        });
+
+        const payRevServiceLamda = createLambda('pay-rev-service-lambda', {
+            entry: path.join(lambdaAppDir, 'payRevService.ts'),
+            functionName: 'pay-rev-service-lambda',
+        });
+
+        const subNoticeOfPaymentToRevLambda = createLambda('sub-notice-payment-rev-lambda', {
+            entry: path.join(lambdaAppDir, 'subNoticeOfPaymentToRev.ts'),
+            functionName: 'sub-notice-payment-rev-lambda',
+        });
+
 
         //Event bridge rules
         const dailyRule = new Rule(this, 'daily-rule', {
@@ -385,5 +422,15 @@ export class BackendStack extends cdk.Stack {
 
         payDividendsQueue.grantSendMessages(timeEventCoordinatorLambda);
         payDividendsLambda.addEventSource(new SqsEventSource(payDividendsQueue, {batchSize: 1}));
+
+        getTaxNumberQueue.grantSendMessages(getTaxNumberLamda);
+        getTaxNumberLamda.addEventSource(new SqsEventSource(getTaxNumberQueue, {batchSize: 1}));
+
+        payRevServiceQueue.grantSendMessages(payRevServiceLamda);
+        payRevServiceLamda.addEventSource(new SqsEventSource(payRevServiceQueue, {batchSize: 1}));
+
+        subNoticeOfPaymentToRevQueue.grantSendMessages(subNoticeOfPaymentToRevLambda);
+        subNoticeOfPaymentToRevLambda.addEventSource(new SqsEventSource(subNoticeOfPaymentToRevQueue, {batchSize: 1}));
+
     }
 }
