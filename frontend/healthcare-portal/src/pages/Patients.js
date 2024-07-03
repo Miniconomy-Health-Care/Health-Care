@@ -11,8 +11,9 @@ const Patients = () => {
     const sampleJson = `[
       {"personaid":"3","isadmitted":true,"recordid":1,"date":"01|02|03","treatmentname":"Doctor Visit","problem":"Sickness","treatmentcost":409600},
       {"personaid":"3","isadmitted":true,"recordid":2,"date":"01|02|03","treatmentname":"Medication","problem":"Prescription","treatmentcost":2044800},
-      {"personaid":"3","isadmitted":true,"recordid":3,"date":"01|02|03","treatmentname":"Medication","problem":"Prescription","treatmentcost":2044800}
-    ]`;
+      {"personaid":"3","isadmitted":true,"recordid":3,"date":"01|02|03","treatmentname":"Surgery","problem":"Prescription","treatmentcost":2044800}
+      {"personaid":"4","isadmitted":true,"recordid":4,"date":"01|02|03","treatmentname":"Surgery","problem":"Prescription","treatmentcost":2044800}
+      ]`;
 
     const patientRecords = JSON.parse(sampleJson);
 
