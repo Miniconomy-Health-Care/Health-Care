@@ -478,28 +478,29 @@ export class BackendStack extends cdk.Stack {
         payDividendsQueue.grantSendMessages(timeEventCoordinatorLambda);
         payDividendsLambda.addEventSource(new SqsEventSource(payDividendsQueue, {batchSize: 1}));
 
-        getTaxNumberQueue.grantSendMessages(getTaxNumberLamda);
+        getTaxNumberQueue.grantSendMessages(simulationEventsLambda);
         getTaxNumberLamda.addEventSource(new SqsEventSource(getTaxNumberQueue, {batchSize: 1}));
 
-        payRevServiceQueue.grantSendMessages(payRevServiceLamda);
+        payRevServiceQueue.grantSendMessages(payVatLambda);
+        payRevServiceQueue.grantSendMessages(payIncomeTaxLambda);
         payRevServiceLamda.addEventSource(new SqsEventSource(payRevServiceQueue, {batchSize: 1}));
 
-        subNoticeOfPaymentToRevQueue.grantSendMessages(subNoticeOfPaymentToRevLambda);
+        subNoticeOfPaymentToRevQueue.grantSendMessages(payRevServiceLamda);
         subNoticeOfPaymentToRevLambda.addEventSource(new SqsEventSource(subNoticeOfPaymentToRevQueue, {batchSize: 1}));
 
-        sellSharesQueue.grantSendMessages(sellSharesLambda);
+        sellSharesQueue.grantSendMessages(registerOnStockMarketLambda);
         sellSharesLambda.addEventSource(new SqsEventSource(sellSharesQueue, {batchSize: 1}));
 
-        registerOnStockMarketQueue.grantSendMessages(registerOnStockMarketLambda);
+        registerOnStockMarketQueue.grantSendMessages(simulationEventsLambda);
         registerOnStockMarketLambda.addEventSource(new SqsEventSource(registerOnStockMarketQueue, {batchSize: 1}));
 
-        payUserDividendsQueue.grantSendMessages(payUserDividendsLambda);
+        payUserDividendsQueue.grantSendMessages(payDividendsLambda);
         payUserDividendsLambda.addEventSource(new SqsEventSource(payUserDividendsQueue, {batchSize: 1}));
 
-        payBusinessDividendsQueue.grantSendMessages(payBusinessDividendsLambda);
+        payBusinessDividendsQueue.grantSendMessages(payDividendsLambda);
         payBusinessDividendsLambda.addEventSource(new SqsEventSource(payBusinessDividendsQueue, {batchSize: 1}));
 
-        buyBusinessSharesQueue.grantSendMessages(buyBusinessSharesLambda);
+        buyBusinessSharesQueue.grantSendMessages(buySharesLambda);
         buyBusinessSharesLambda.addEventSource(new SqsEventSource(buyBusinessSharesQueue, {batchSize: 1}));
 
     }

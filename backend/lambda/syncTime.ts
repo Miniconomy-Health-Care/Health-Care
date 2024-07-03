@@ -16,7 +16,7 @@ export const handler = async () => {
   const startDate = response.body.start_date;
   const latestStartTime = new Date(`${startDate}Z`).getTime();
 
-    const sql = await getSqlPool();
+  const sql = await getSqlPool();
 
   const getTimeQuery = 'SELECT starttime FROM time';
   const queryRes = await sql.query(getTimeQuery);
