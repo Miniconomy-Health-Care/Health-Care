@@ -5,6 +5,7 @@ import {GitHubStackProps} from './githubStackProps';
 import {
     AuthorizationType,
     CognitoUserPoolsAuthorizer,
+    Cors,
     JsonSchemaType,
     LambdaIntegration,
     Model,
@@ -420,6 +421,10 @@ export class BackendStack extends cdk.Stack {
         const privateApi = new RestApi(this, `${appName}-private-api-gateway`, {
             deployOptions: {stageName: 'prod'},
             restApiName: `${appName}-private-api`,
+            defaultCorsPreflightOptions: {
+                allowOrigins: Cors.ALL_ORIGINS,
+                allowMethods: Cors.ALL_METHODS
+            },
             defaultMethodOptions: {
                 authorizationType: AuthorizationType.COGNITO,
                 authorizer: new CognitoUserPoolsAuthorizer(this, 'cognito-api-authorizer', {
