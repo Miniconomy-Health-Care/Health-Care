@@ -211,6 +211,18 @@ export class BackendStack extends cdk.Stack {
             contentBasedDeduplication: true,
         });
 
+        const dischargePatientQueue = new Queue(this, 'discharge-patient', {
+            queueName: 'discharge-patient.fifo',
+            visibilityTimeout: Duration.minutes(5),
+            contentBasedDeduplication: true,
+        });
+
+        const checkPatientDiedQueue = new Queue(this, 'check-patient-died', {
+            queueName: 'check-patient-died.fifo',
+            visibilityTimeout: Duration.minutes(5),
+            contentBasedDeduplication: true,
+        });
+
         //Lambdas
         const lambdaEnv = {
             'DB_SECRET': dbInstance.secret?.secretArn!,
@@ -228,7 +240,9 @@ export class BackendStack extends cdk.Stack {
             'REGISTER_ON_STOCKMARKET_QUEUE_URL': registerOnStockMarketQueue.queueUrl,
             'PAY_USER_DIVIDENDS_QUEUE_URL': payUserDividendsQueue.queueUrl,
             'PAY_BUSINESS_DIVIDENDS_QUEUE_URL': payBusinessDividendsQueue.queueUrl,
-            'BUY_BUSINESS_SHARES_QUEUE_URL': buyBusinessSharesQueue.queueUrl
+            'BUY_BUSINESS_SHARES_QUEUE_URL': buyBusinessSharesQueue.queueUrl,
+            'DISCHARGE_PATIENT_QUEUE_URL': dischargePatientQueue.queueUrl,
+            'CHECK_PATIENT_DIED_QUEUE_URL': checkPatientDiedQueue.queueUrl
         };
 
         const lambdaAppDir = path.resolve(__dirname, '../../lambda');
@@ -308,18 +322,17 @@ export class BackendStack extends cdk.Stack {
             entry: path.join(lambdaAppDir, 'timeEventCoordinator.ts'),
             functionName: 'time-event-coordinator-lambda',
         });
-        
+
         const syncTimeLambda = createLambda('sync-time-lambda', {
             entry: path.join(lambdaAppDir, 'syncTime.ts'),
             functionName: 'sync-time-lambda',
         });
-        
+
         const getTransactions = createLambda('get-transactions-lambda', {
             entry: path.join(lambdaAppDir, 'getTransactions.ts'),
             functionName: 'get-transactions-lambda',
         });
-        
-        
+
 
         const simulationEventsLambda = createLambda('simulation-events-lambda', {
             entry: path.join(lambdaAppDir, 'simulationEvents.ts'),
@@ -359,6 +372,16 @@ export class BackendStack extends cdk.Stack {
         const buyBusinessSharesLambda = createLambda('buy-business-shares-lambda', {
             entry: path.join(lambdaAppDir, 'buyBusinessShares.ts'),
             functionName: 'buy-business-shares-lambda',
+        });
+
+        const dischargePatientLambda = createLambda('discharge-patient-lambda', {
+            entry: path.join(lambdaAppDir, 'dischargePatient.ts'),
+            functionName: 'discharge-patient-lambda',
+        });
+
+        const checkIfPatientDiedLambda = createLambda('check-patient-died-lambda', {
+            entry: path.join(lambdaAppDir, 'checkIfPatientDied.ts'),
+            functionName: 'check-patient-died-lambda',
         });
 
 
@@ -406,16 +429,16 @@ export class BackendStack extends cdk.Stack {
                 })
             }
         });
-        
+
         // Public api resources
         const apiResource = api.root.addResource('api');
         const patientResource = apiResource.addResource('patient');
-        
+
         // Private api resources
         const privateApiResource = privateApi.root.addResource('api');
         const privatePatientResource = privateApiResource.addResource('patient');
         const privatePatientRecordResource = privatePatientResource.addResource('record');
-        
+
         // Create patient endpoint
         const createPatientRequestModel = new Model(this, 'create-patient-request-model', {
             restApi: api,
@@ -461,10 +484,10 @@ export class BackendStack extends cdk.Stack {
         const privateBankResource = privateApiResource.addResource('bank');
         privateBankResource.addResource('balance').addMethod(HttpMethod.GET, new LambdaIntegration(getBankBalanceLambda));
         privateBankResource.addResource('transactions').addMethod(HttpMethod.GET, new LambdaIntegration(getTransactions));
-        
+
         // QUEUE Configs
         chargeHealthInsuranceLambda.addEventSource(new SqsEventSource(chargeHealthInsuranceQueue, {batchSize: 1}));
-        chargeHealthInsuranceQueue.grantSendMessages(createPatientLambda);
+        chargeHealthInsuranceQueue.grantSendMessages(dischargePatientLambda);
 
         payIncomeTaxLambda.addEventSource(new SqsEventSource(payIncomeTaxQueue, {batchSize: 1}));
         payIncomeTaxQueue.grantSendMessages(timeEventCoordinatorLambda);
@@ -481,8 +504,8 @@ export class BackendStack extends cdk.Stack {
         getTaxNumberQueue.grantSendMessages(simulationEventsLambda);
         getTaxNumberLamda.addEventSource(new SqsEventSource(getTaxNumberQueue, {batchSize: 1}));
 
-        payRevServiceQueue.grantSendMessages(payVatLambda);
         payRevServiceQueue.grantSendMessages(payIncomeTaxLambda);
+        payRevServiceQueue.grantSendMessages(payVatLambda);
         payRevServiceLamda.addEventSource(new SqsEventSource(payRevServiceQueue, {batchSize: 1}));
 
         subNoticeOfPaymentToRevQueue.grantSendMessages(payRevServiceLamda);
@@ -503,5 +526,10 @@ export class BackendStack extends cdk.Stack {
         buyBusinessSharesQueue.grantSendMessages(buySharesLambda);
         buyBusinessSharesLambda.addEventSource(new SqsEventSource(buyBusinessSharesQueue, {batchSize: 1}));
 
+        dischargePatientQueue.grantSendMessages(checkIfPatientDiedLambda);
+        dischargePatientLambda.addEventSource(new SqsEventSource(dischargePatientQueue, {batchSize: 1}));
+
+        checkPatientDiedQueue.grantSendMessages(createPatientLambda);
+        checkIfPatientDiedLambda.addEventSource(new SqsEventSource(checkPatientDiedQueue, {batchSize: 1}));
     }
 }
