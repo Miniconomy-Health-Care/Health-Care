@@ -5,7 +5,7 @@ export const handler: SQSHandler = async (sqsEvent) => {
     console.log(sqsEvent);
 
     const body = sqsEvent.Records[0].body;
-    const {business} = JSON.parse(body);
+    const business = JSON.parse(body);
 
     const requestBody = {
         "buyerId": "healthcare",
@@ -23,7 +23,7 @@ export const handler: SQSHandler = async (sqsEvent) => {
         throw new Error('Failed to pruchase shares from the stockmarket');
     }
 
-    purchaseShares(business, response.body.referenceId, response.body.amountToPay)
+    await purchaseShares(business, response.body.referenceId, response.body.amountToPay);
 
 };
 
