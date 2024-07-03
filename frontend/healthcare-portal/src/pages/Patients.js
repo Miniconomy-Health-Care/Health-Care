@@ -1,6 +1,7 @@
 import React from 'react';
 import { Container, Paper, Typography } from '@mui/material';
 import TableTemplate from '../components/TableTemplate';
+import { getPersonaRecords } from '../api/api';
 
 const Patients = () => {
  const columns = ['Persona ID', 'Persona Status', 'Record ID', 'Date', 'Treatment Type', 'Problem', 'Cost'];
@@ -17,6 +18,8 @@ const patients = [
   { recordid: 9, personalid: 9, PersonaStatus: 'Admitted', date: '2023-07-10', treatmentname: 'Surgery', problem: 'Hernia', cost: 7000 },
   { recordid: 10, personalid: 10, PersonaStatus: 'Discharged', date: '2023-07-15', treatmentname: 'Physical Therapy', problem: 'Knee Pain', cost: 350 },
 ];
+
+getPersonaRecords().then((records) => console.log(records)).catch((err) => console.log(err));
 
   return (
     <Container maxWidth="lg">
