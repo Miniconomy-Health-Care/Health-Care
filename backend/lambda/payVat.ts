@@ -8,7 +8,8 @@ import assert from 'node:assert';
 export const handler: SQSHandler = async (sqsEvent) => {
     console.log(sqsEvent);
 
-    const date = await getCurrentDate();
+    const body = sqsEvent.Records[0].body;
+    const {date} = JSON.parse(body);
     const pool = await getSqlPool();
 
     //Get our tax number
@@ -17,7 +18,9 @@ export const handler: SQSHandler = async (sqsEvent) => {
     const taxNumber = taxNumberQueryRes.rows[0].tax_id;
 
     const monthlyCostsQuery = 'SELECT CalculateMonthlyCosts($1, $2)';
-    const monthlyCostsQueryRes = await pool.query(monthlyCostsQuery, [date.month, date.year]);
+    const month = date.month === 1 ? 12 : date.month - 1;
+    const year = date.month === 1 ?  date.year - 1 : date.year;
+    const monthlyCostsQueryRes = await pool.query(monthlyCostsQuery, [month, year]);
     const monthlyCost = monthlyCostsQueryRes.rows[0].calculatemonthlycosts;
 
 
