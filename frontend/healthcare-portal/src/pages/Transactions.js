@@ -17,8 +17,8 @@ const Transactions = () => {
         "items": [
           {
             "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-            "debitAccountName": "health_insurance",
-            "creditAccountName": "health_care",
+            "debitAccountName": "health-insurance",
+            "creditAccountName": "health-care",
             "reference": "7",
             "amount": 1024,
             "date": "24|06|15",
@@ -26,8 +26,8 @@ const Transactions = () => {
           },
           {
             "id": "4bb85f64-6717-4562-b3fc-3d963f77bfa7",
-            "debitAccountName": "health_insurance",
-            "creditAccountName": "health_care",
+            "debitAccountName": "health-insurance",
+            "creditAccountName": "health-care",
             "reference": "1",
             "amount": 2024,
             "date": "24|06|16",
@@ -35,8 +35,8 @@ const Transactions = () => {
           },
           {
             "id": "5cc95f64-7717-4562-b3fc-4e963f88cfa8",
-            "debitAccountName": "health_care",
-            "creditAccountName": "central_revenue",
+            "debitAccountName": "health-care",
+            "creditAccountName": "central-revenue",
             "reference": "VAT",
             "amount": 5120,
             "date": "24|06|17",
@@ -44,17 +44,17 @@ const Transactions = () => {
           },
           {
             "id": "6dd95f64-8717-4562-b3fc-5f963f99dfa9",
-            "debitAccountName": "stock_exchange",
-            "creditAccountName": "health_care",
+            "debitAccountName": "stock-exchange",
+            "creditAccountName": "health-care",
             "reference": "dividends",
             "amount": 2048,
-            "date": "24|06|18",
+            "date": "24|05|18",
             "status": "completed"
           },
           {
             "id": "7ee95f64-9717-4562-b3fc-6g963fa1efa0",
-            "debitAccountName": "health_care",
-            "creditAccountName": "central_revenue",
+            "debitAccountName": "health-care",
+            "creditAccountName": "central-revenue",
             "reference": "Income Tax",
             "amount": 9216,
             "date": "24|06|19",
@@ -80,9 +80,11 @@ const Transactions = () => {
 
     setTransactions(formattedTransactions);
 
-    //Remove all code above once you make sure getTransactionRecords() works when the actual API is ready
-    getBankTransactions()
-      .then((records) => {
+    //Remove all code above once in this useEffect once you make sure getTransactionRecords() works when the API is ready
+    // I have tried to plan for call failure, I just hope the table is empty on the respective page
+    const fetchTransactions = async () => {
+      try {
+        const records = await getBankTransactions();
         const transactionsRecords = records.data.items;
         const formattedTransactions = transactionsRecords.map(transaction => ({
           'Transaction ID': transaction.id,
@@ -94,8 +96,12 @@ const Transactions = () => {
           'Status': transaction.status,
         }));
         setTransactions(formattedTransactions);
-      })
-      .catch((err) => console.log(err));
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchTransactions();
   }, []);
 
   return (

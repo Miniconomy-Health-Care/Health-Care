@@ -31,9 +31,11 @@ const Taxes = () => {
 
     setTaxes(formattedTaxes);
 
-    //Remove the code above once you make sure getTaxRecords() works when the actual API is ready
-    getTaxRecords()
-      .then((records) => {
+    //Remove the code above in this useEffect once you make sure getTaxRecords() work when the API is ready
+    // I have tried to plan for call failure, I just hope the table is empty on the respective page
+    const fetchTaxRecords = async () => {
+      try {
+        const records = await getTaxRecords();
         const formattedTaxes = records.map(tax => ({
           'Tax ID': tax.taxid,
           'Name': tax.name,
@@ -42,9 +44,12 @@ const Taxes = () => {
           'Amount': tax.amount
         }));
         setTaxes(formattedTaxes);
-      })
-      .catch((err) => console.log(err));
-    
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchTaxRecords();
   }, []);
 
   return (

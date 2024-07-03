@@ -31,9 +31,11 @@ const Patients = () => {
 
     setPatients(formattedPatients);
 
-    //Remove the code above once you make sure getPersonaRecords() works when the actual API is ready
-     getPersonaRecords()
-      .then((records) => {
+    //Remove the code above in this useEffect once you make sure getPersonaRecords() works when the API is ready
+    // I have tried to plan for call failure, I just hope the table is empty on the respective page
+    const fetchPatients = async () => {
+      try {
+        const records = await getPersonaRecords();
         const formattedPatients = records.map(patient => ({
           PersonaID: patient.personaid,
           PersonaStatus: patient.isadmitted ? 'Admitted' : 'Discharged',
@@ -44,8 +46,12 @@ const Patients = () => {
           Cost: patient.treatmentcost
         }));
         setPatients(formattedPatients);
-      })
-      .catch((err) => console.log(err));
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchPatients();
 
   }, []);
 
