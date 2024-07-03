@@ -14,8 +14,8 @@ const Stocks = () => {
 
   return (
     <Container>
-      <Typography variant="h4" align="center" className="tableHeading">Stocks Table</Typography>
       <Paper className="tablePaper">
+        <Typography variant="h4" align="center" className="tableHeading">Stocks Table</Typography>
         <TableTemplate columns={columns} rows={stocks} />
       </Paper>
     </Container>
