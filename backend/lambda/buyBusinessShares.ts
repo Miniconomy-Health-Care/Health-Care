@@ -29,6 +29,8 @@ export const handler: SQSHandler = async (sqsEvent) => {
 
 const purchaseShares = async (business: any, referenceId:any, amountToPay:any) => {
 
+    console.log(`creditAccountName referenceId: ${referenceId}`);
+
     const requestBody = {
         "transactions": [
           {

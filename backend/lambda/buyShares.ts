@@ -3,8 +3,8 @@ import {httpsFetch} from '../utils/fetchUtils';
 import assert from 'node:assert';
 import {sendQueueMessage} from '../utils/queueUtils';
 
-export const handler: SQSHandler = async (event) => {
-    console.log(event);
+export const handler: SQSHandler = async (sqsEvent) => {
+    console.log(sqsEvent);
 
     const currentBankBalance = await getBankBalance();
     const balanceForShares = currentBankBalance*0.10;

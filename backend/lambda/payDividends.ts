@@ -2,9 +2,14 @@ import {SQSHandler} from 'aws-lambda';
 import {httpsFetch} from '../utils/fetchUtils';
 import assert from 'node:assert';
 import {sendQueueMessage} from '../utils/queueUtils';
+import {getSqlPool} from '../utils/dbUtils';
 
 export const handler: SQSHandler = async (sqsEvent) => {
     console.log(sqsEvent);
+
+    const body = sqsEvent.Records[0].body;
+    const {date} = JSON.parse(body);
+    const pool = await getSqlPool();
 
     //get details of healthcare shareholders
     const response = await httpsFetch({
@@ -17,12 +22,9 @@ export const handler: SQSHandler = async (sqsEvent) => {
         throw new Error('Failed to get healthcare shareholders');
     }
 
-    //get the market value of healthcare
-    const healthcareMarketValue = await getHealthcareMarketValue();
-
-    if(healthcareMarketValue === 0){
-        throw new Error('Failed to get market value for healthcare');
-    }
+    const yearlyCostsQuery = 'SELECT CalculateYearlyCosts($1)';
+    const yearlyCostsQueryRes = await pool.query(yearlyCostsQuery, [date.year - 1]);
+    const yearlyCost = yearlyCostsQueryRes.rows[0].calculateyearlycosts;
 
     type shareholderType = { holderId: string; holderType: string; quantity: number; bankAccount: string; };
 
@@ -35,36 +37,12 @@ export const handler: SQSHandler = async (sqsEvent) => {
     response.body.forEach(async (shareholder: shareholderType) => {
 
         if(shareholder.holderType === "user"){
-            await sendQueueMessage(UserDivQueueUrl, {shareholder, healthcareMarketValue});
+            await sendQueueMessage(UserDivQueueUrl, {shareholder, yearlyCost});
         }
         else if(shareholder.holderType === "business"){
-            await sendQueueMessage(BusinessDivQueueUrl, {shareholder, healthcareMarketValue});
+            await sendQueueMessage(BusinessDivQueueUrl, {shareholder, yearlyCost});
         }
 
     });
 
 };
-
-
-const getHealthcareMarketValue = async () =>{
-
-    const businessMarketValues = await httpsFetch({
-        method: 'GET',
-        host: 'api.mese.projects.bbdgrad.com',
-        path: '/businesses'
-    });
-
-    if (businessMarketValues.statusCode !== 200) {
-        throw new Error('Failed to get market value of businesses from Stock Market');
-    }
-
-    type businessType = {id: string; name: string; currentMarketValue: number;};
-
-    businessMarketValues.body.forEach(async (business: businessType) => {
-        if(business.name === "healthcare"){
-            return business.currentMarketValue
-        }
-    });
-
-    return 0;
-}
