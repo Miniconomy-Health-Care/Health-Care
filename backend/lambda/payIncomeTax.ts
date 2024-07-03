@@ -16,16 +16,16 @@ export const handler: SQSHandler = async (sqsEvent) => {
     const taxNumberQueryRes = await pool.query(taxNumberQuery);
     const taxNumber = taxNumberQueryRes.rows[0].tax_id;
 
-    const monthlyCostsQuery = 'SELECT CalculateMonthlyCosts($1, $2)';
-    const monthlyCostsQueryRes = await pool.query(monthlyCostsQuery, [date.month, date.year]);
-    const monthlyCost = monthlyCostsQueryRes.rows[0].calculatemonthlycosts;
+    const yearlyCostsQuery = 'SELECT CalculateYearlyCosts($1)';
+    const yearlyCostsQueryRes = await pool.query(yearlyCostsQuery, [date.year]);
+    const yearlyCost = yearlyCostsQueryRes.rows[0].calculateyearlycosts;
 
 
     //get amount of income tax due from revenue service
     const requestBody = {
         "taxId": taxNumber,
         "taxType": "INCOME",
-        "amount": monthlyCost
+        "amount": yearlyCost
     };
 
     const response = await httpsFetch({
