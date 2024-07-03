@@ -8,7 +8,8 @@ import assert from 'node:assert';
 export const handler: SQSHandler = async (sqsEvent) => {
     console.log(sqsEvent);
 
-    const date = await getCurrentDate();
+    const body = sqsEvent.Records[0].body;
+    const {date} = JSON.parse(body);
     const pool = await getSqlPool();
 
     //Get our tax number
