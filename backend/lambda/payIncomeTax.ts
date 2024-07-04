@@ -23,9 +23,9 @@ export const handler: SQSHandler = async (sqsEvent) => {
 
     //get amount of income tax due from revenue service
     const requestBody = {
-        "taxId": taxNumber,
-        "taxType": "INCOME",
-        "amount": yearlyCost
+        'taxId': taxNumber,
+        'taxType': 'INCOME',
+        'amount': yearlyCost
     };
 
     const response = await httpsFetch({
@@ -40,10 +40,11 @@ export const handler: SQSHandler = async (sqsEvent) => {
 
     const paymentId = response.body.paymentId;
     const amountDue = response.body.amountDue;
-    const taxType = "Income";
+    const taxType = 'Income';
 
     const queueUrl = process.env.PAY_REV_SERVICE_QUEUE_URL;
     assert(queueUrl, 'PAY_REV_SERVICE_QUEUE_URL was not set');
 
+    await pool.end();
     await sendQueueMessage(queueUrl, {paymentId, amountDue, taxType, date});
 };

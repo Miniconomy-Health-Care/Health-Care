@@ -13,15 +13,15 @@ export const handler: SQSHandler = async (sqsEvent) => {
 
     //pay tax to revenue service
     const requestBody = {
-            "transactions": [
-              {
-                "debitAccountName": "health-care",
-                "creditAccountName": "central-revenue-service",
-                "amount": amountDue,
-                "debitRef": `${taxType} tax payment`,
-                "creditRef": paymentId
-              }
-            ]
+        'transactions': [
+            {
+                'debitAccountName': 'health-care',
+                'creditAccountName': 'central-revenue-service',
+                'amount': amountDue,
+                'debitRef': `${taxType} tax payment`,
+                'creditRef': paymentId
+            }
+        ]
     };
 
     const response = await httpsFetch({
@@ -42,6 +42,7 @@ export const handler: SQSHandler = async (sqsEvent) => {
     const queueUrl = process.env.SUB_NOTICE_OF_PAYMENT_TO_REV_QUEUE_URL;
     assert(queueUrl, 'SUB_NOTICE_OF_PAYMENT_TO_REV_QUEUE_URL was not set');
 
+    await pool.end();
     await sendQueueMessage(queueUrl, {taxNumber, paymentId});
 
-}
+};

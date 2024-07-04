@@ -25,4 +25,6 @@ export const handler: SQSHandler = async (sqsEvent) => {
     const pool = await getSqlPool();
     const query = 'INSERT INTO TaxNumber (tax_id) VALUES ($1);';
     const queryRes = await pool.query(query, [taxNumber]);
+
+    await pool.end();
 };

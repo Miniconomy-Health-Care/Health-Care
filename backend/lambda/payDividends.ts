@@ -34,12 +34,12 @@ export const handler: SQSHandler = async (sqsEvent) => {
     const BusinessDivQueueUrl = process.env.PAY_BUSINESS_DIVIDENDS_QUEUE_URL;
     assert(BusinessDivQueueUrl, 'PAY_BUSINESS_DIVIDENDS_QUEUE_URL was not set');
 
+    await pool.end();
     response.body.forEach(async (shareholder: shareholderType) => {
 
-        if(shareholder.holderType === "user"){
+        if (shareholder.holderType === 'user') {
             await sendQueueMessage(UserDivQueueUrl, {shareholder, yearlyCost});
-        }
-        else if(shareholder.holderType === "business"){
+        } else if (shareholder.holderType === 'business') {
             await sendQueueMessage(BusinessDivQueueUrl, {shareholder, yearlyCost});
         }
 

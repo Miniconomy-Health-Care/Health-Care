@@ -6,13 +6,14 @@ import assert from 'node:assert';
 export const handler: SQSHandler = async (event) => {
     const body = JSON.parse(event.Records[0].body);
     const queueUrl = process.env.CHARGE_HEALTH_INSURANCE_QUEUE_URL;
-    assert(queueUrl, "CHARGE_HEALTH_INSURANCE_QUEUE_URL not set");
+    assert(queueUrl, 'CHARGE_HEALTH_INSURANCE_QUEUE_URL not set');
 
     const {personaId} = body;
     const pool = await getSqlPool();
     const dischargePatientQuery = 'UPDATE persona SET isAdmitted=false WHERE personaId=$1';
-    const dischargeRes = await pool.query(dischargePatientQuery, [personaId])
-    
+    const dischargeRes = await pool.query(dischargePatientQuery, [personaId]);
+    await pool.end();
+
     await sendQueueMessage(queueUrl, body);
-    
-} 
+
+}; 

@@ -20,8 +20,12 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
     const res = await pool.query(getPatientRecordQuery, [personaId]);
     const record = res.rows[0];
 
-    await sendQueueMessage(queueUrl, {personaId, cost: Number(record['treatmentcost']), identifier: record['recordid']});
-
+    await sendQueueMessage(queueUrl, {
+        personaId,
+        cost: Number(record['treatmentcost']),
+        identifier: record['recordid']
+    });
+    await pool.end();
     return {
         statusCode: 200,
         body: ''

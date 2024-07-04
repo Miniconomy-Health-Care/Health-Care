@@ -18,16 +18,16 @@ export const handler: SQSHandler = async (sqsEvent) => {
 
     const monthlyCostsQuery = 'SELECT CalculateMonthlyCosts($1, $2)';
     const month = date.month === 1 ? 12 : date.month - 1;
-    const year = date.month === 1 ?  date.year - 1 : date.year;
+    const year = date.month === 1 ? date.year - 1 : date.year;
     const monthlyCostsQueryRes = await pool.query(monthlyCostsQuery, [month, year]);
     const monthlyCost = monthlyCostsQueryRes.rows[0].calculatemonthlycosts;
 
 
     //get amount of VAT due from revenue service
     const requestBody = {
-        "taxId": taxNumber,
-        "taxType": "VAT",
-        "amount": monthlyCost
+        'taxId': taxNumber,
+        'taxType': 'VAT',
+        'amount': monthlyCost
     };
 
     const response = await httpsFetch({
@@ -42,10 +42,11 @@ export const handler: SQSHandler = async (sqsEvent) => {
 
     const paymentId = response.body.paymentId;
     const amountDue = response.body.amountDue;
-    const taxType = "VAT";
+    const taxType = 'VAT';
 
     const queueUrl = process.env.PAY_REV_SERVICE_QUEUE_URL;
     assert(queueUrl, 'PAY_REV_SERVICE_QUEUE_URL was not set');
 
+    await pool.end();
     await sendQueueMessage(queueUrl, {paymentId, amountDue, taxType, date, taxNumber});
 };
