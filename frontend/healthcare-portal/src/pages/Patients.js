@@ -1,42 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import { Container, Paper, Typography } from '@mui/material';
+import React, {useEffect, useState} from 'react';
+import {Container, Paper, Typography} from '@mui/material';
 import TableTemplate from '../components/TableTemplate';
-import { getPersonaRecords } from '../api/api';
+import {getPersonaRecords} from '../api/api';
 
 const Patients = () => {
   const columns = ['Persona ID', 'Persona Status', 'Record ID', 'Date', 'Treatment Type', 'Problem', 'Cost'];
   const [patients, setPatients] = useState([]);
 
   useEffect(() => {
-    const sampleJson = `[
-      {"personaid":"6","isadmitted":true,"recordid":1,"date":"01|02|03","treatmentname":"Doctor Visit","problem":"Sickness","treatmentcost":409600},
-      {"personaid":"8","isadmitted":true,"recordid":2,"date":"01|02|03","treatmentname":"Medication","problem":"Prescription","treatmentcost":2044800},
-      {"personaid":"5","isadmitted":true,"recordid":3,"date":"01|02|03","treatmentname":"Medication","problem":"Prescription","treatmentcost":2044800},
-      {"personaid":"3","isadmitted":true,"recordid":3,"date":"01|02|03","treatmentname":"Surgery","problem":"Prescription","treatmentcost":2044800},
-      {"personaid":"1","isadmitted":true,"recordid":3,"date":"01|02|03","treatmentname":"Surgery","problem":"Prescription","treatmentcost":2044800}
-      ]`;
-
-    const patientRecords = JSON.parse(sampleJson);
-
-    const formattedPatients = patientRecords.map(patient => ({
-      PersonaID: patient.personaid,
-      PersonaStatus: patient.isadmitted ? 'Admitted' : 'Discharged',
-      RecordID: patient.recordid,
-      Date: patient.date,
-      TreatmentType: patient.treatmentname,
-      Problem: patient.problem,
-      Cost: patient.treatmentcost
-    }));
-    console.table( formattedPatients);
-
-    setPatients(formattedPatients);
-
-    //Remove the code above in this useEffect once you make sure getPersonaRecords() works when the API is ready
-    // I have tried to plan for call failure, I just hope the table is empty on the respective page
     const fetchPatients = async () => {
       try {
         const records = await getPersonaRecords();
-        const formattedPatients = records.map(patient => ({
+        const jsonBody = await records.json();
+        const formattedPatients = jsonBody.map(patient => ({
           PersonaID: patient.personaid,
           PersonaStatus: patient.isadmitted ? 'Admitted' : 'Discharged',
           RecordID: patient.recordid,

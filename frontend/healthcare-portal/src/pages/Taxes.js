@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { Container, Paper, Typography } from '@mui/material';
+import React, {useEffect, useState} from 'react';
+import {Container, Paper, Typography} from '@mui/material';
 import TableTemplate from '../components/TableTemplate';
-import { getTaxRecords } from '../api/api';
+import {getTaxRecords} from '../api/api';
 
 const Taxes = () => {
   const columns = ['Tax ID', 'Name', 'Month', 'Year', 'Amount'];
@@ -31,12 +31,11 @@ const Taxes = () => {
 
     setTaxes(formattedTaxes);
 
-    //Remove the code above in this useEffect once you make sure getTaxRecords() work when the API is ready
-    // I have tried to plan for call failure, I just hope the table is empty on the respective page
     const fetchTaxRecords = async () => {
       try {
         const records = await getTaxRecords();
-        const formattedTaxes = records.map(tax => ({
+        const jsonBody = await records.json();
+        const formattedTaxes = jsonBody.map(tax => ({
           'Tax ID': tax.taxid,
           'Name': tax.name,
           'Month': tax.month,

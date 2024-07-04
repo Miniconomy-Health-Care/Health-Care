@@ -7,7 +7,8 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
         const response = await httpsFetch({
             method: 'GET',
             host: 'api.commercialbank.projects.bbdgrad.com',
-            path: '/transactions'
+            path: '/transactions?pageSize=25',
+
         });
 
         if (response.statusCode !== 200) {
@@ -28,7 +29,14 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
         console.log('Successfully retrieved transaction history');
         return {
             statusCode: 200,
-            body: JSON.stringify(response.body)
+            body: JSON.stringify(response.body),
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Headers': Cors.DEFAULT_HEADERS.join(','),
+                'Access-Control-Allow-Origin': Cors.ALL_ORIGINS.join(','),
+                'Access-Control-Allow-Methods': Cors.ALL_METHODS.join(','),
+                'Vary': 'Origin'
+            }
         };
     } catch (error) {
         console.error('Error:', error);
