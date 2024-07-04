@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { Container, Paper, Typography } from '@mui/material';
+import React, {useEffect, useState} from 'react';
+import {Container, Paper, Typography} from '@mui/material';
 import TableTemplate from '../components/TableTemplate';
-import { getBankTransactions } from '../api/api';
+import {getBankTransactions} from '../api/api';
 
 const Transactions = () => {
   const columns = ['Transaction ID', 'Sender', 'Recipient', 'Reference', 'Amount in ₥', 'Date', 'Status'];
@@ -85,7 +85,8 @@ const Transactions = () => {
     const fetchTransactions = async () => {
       try {
         const records = await getBankTransactions();
-        const transactionsRecords = records.data.items;
+        const jsonBody = await records.json();
+        const transactionsRecords = jsonBody.data.items;
         const formattedTransactions = transactionsRecords.map(transaction => ({
           'Transaction ID': transaction.id,
           'Sender': transaction.debitAccountName,
