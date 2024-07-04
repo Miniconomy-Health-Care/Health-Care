@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, TableSortLabel } from '@mui/material';
+import { Table, Box, Typography, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, TableSortLabel } from '@mui/material';
 
 const TableTemplate = ({ columns, rows }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -8,11 +8,19 @@ const TableTemplate = ({ columns, rows }) => {
   const [orderBy, setOrderBy] = useState('');
 
   const handleSearch = (event) => {
-    setSearchQuery(event.target.value);
+    const query = event.target.value;
+    const validQuery = query.replace(/[^a-zA-Z0-9 ]/g, '');
+    setSearchQuery(validQuery);
+
+    if (validQuery === '') {
+      setSortedRows(rows);
+      return;
+    }
+    
     const filteredRows = rows.filter(row => {
       return columns.some(column => {
-        const cellValue = row[column.toLowerCase().replace(/ /g, '')];
-        return cellValue.toString().toLowerCase().includes(event.target.value.toLowerCase());
+        const cellValue = row[column];
+        return cellValue && cellValue.toString().toLowerCase().includes(validQuery.toLowerCase());
       });
     });
     setSortedRows(filteredRows);
@@ -53,34 +61,40 @@ const TableTemplate = ({ columns, rows }) => {
           style: { marginBottom: '16px' },
         }}
       />
-      <Table>
-        <TableHead>
-          <TableRow>
-            {columns.map((column, index) => (
-              <TableCell key={index} className="MuiTableCell-head">
-                <TableSortLabel
-                  active={orderBy === column.toLowerCase().replace(/ /g, '')}
-                  direction={orderBy === column.toLowerCase().replace(/ /g, '') ? orderDirection : 'asc'}
-                  onClick={() => handleSort(column.toLowerCase().replace(/ /g, ''))}
-                >
-                  {column}
-                </TableSortLabel>
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {sortedRows.map((row, rowIndex) => (
-            <TableRow key={rowIndex} className="MuiTableRow-root">
-              {Object.values(row).map((value, cellIndex) => (
-                <TableCell key={cellIndex} className="MuiTableCell-body">
-                  {value}
+      {sortedRows.length === 0 ? (
+        <Box display="flex" justifyContent="center" marginTop="1rem">
+          <Typography>No Records Found</Typography>
+        </Box>
+      ) : (
+        <Table>
+          <TableHead>
+            <TableRow>
+              {columns.map((column, index) => (
+                <TableCell key={index} className="MuiTableCell-head">
+                  <TableSortLabel
+                    active={orderBy === column}
+                    direction={orderBy === column ? orderDirection : 'asc'}
+                    onClick={() => handleSort(column)}
+                  >
+                    {column}
+                  </TableSortLabel>
                 </TableCell>
               ))}
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHead>
+          <TableBody>
+            {sortedRows.map((row, rowIndex) => (
+              <TableRow key={rowIndex} className="MuiTableRow-root">
+                {columns.map((column, cellIndex) => (
+                  <TableCell key={cellIndex} className="MuiTableCell-body">
+                    {row[column]}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
     </TableContainer>
   );
 };

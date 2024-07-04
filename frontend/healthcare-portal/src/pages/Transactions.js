@@ -4,7 +4,7 @@ import TableTemplate from '../components/TableTemplate';
 import {getBankTransactions} from '../api/api';
 
 const Transactions = () => {
-  const columns = ['Transaction ID', 'Sender', 'Recipient', 'Reference', 'Amount in ₥', 'Date', 'Status'];
+  const columns = ['Transaction ID', 'Sender', 'Recipient', 'Reference', 'Amount', 'Date', 'Status'];
   const [transactions, setTransactions] = useState([]);
 
   useEffect(() => {
@@ -18,7 +18,7 @@ const Transactions = () => {
           'Sender': transaction.debitAccountName,
           'Recipient': transaction.creditAccountName,
           'Reference': transaction.reference,
-          'Amount': transaction.amount,
+          'Amount': transaction.amount + "₥",
           'Date': transaction.date,
           'Status': transaction.status,
         }));

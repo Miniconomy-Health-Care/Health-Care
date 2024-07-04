@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Container, Paper, Typography} from '@mui/material';
+import {Container, Paper, Typography, Box} from '@mui/material';
 import TableTemplate from '../components/TableTemplate';
 import {getPersonaRecords} from '../api/api';
 
@@ -19,7 +19,7 @@ const Patients = () => {
           Date: patient.date,
           TreatmentType: patient.treatmentname,
           Problem: patient.problem,
-          Cost: patient.treatmentcost
+          Cost: patient.treatmentcost + " ₥"
         }));
         setPatients(formattedPatients);
       } catch (err) {
