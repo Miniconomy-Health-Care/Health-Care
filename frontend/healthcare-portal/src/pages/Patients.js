@@ -4,7 +4,7 @@ import TableTemplate from '../components/TableTemplate';
 import {getPersonaRecords} from '../api/api';
 
 const Patients = () => {
-  const columns = ['Persona ID', 'Persona Status', 'Record ID', 'Date', 'Treatment Type', 'Problem', 'Cost'];
+  const columns = ['PersonaID', 'PersonaStatus', 'RecordID', 'Date', 'TreatmentType', 'Problem', 'Cost'];
   const [patients, setPatients] = useState([]);
 
   useEffect(() => {
