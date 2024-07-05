@@ -17,7 +17,7 @@ export const handler: SQSHandler = async (sqsEvent, c) => {
 
     const response = await httpsFetch({
         method: 'POST',
-        host: 'api.health.projects.bbdgrad.com',
+        host: 'health-insurance-api-web.eu-west-1.elasticbeanstalk.com',
         path: '/pay-claim'
     }, requestBody);
 
