@@ -15,7 +15,7 @@ export const handler: SQSHandler = async (sqsEvent) => {
     const response = await httpsFetch({
         method: 'POST',
         host: 'api.mese.projects.bbdgrad.com',
-        path: '/businesses'
+        path: '/businesses?callbackUrl=string',
     }, requestBody);
 
     if (response.statusCode !== 200) {
